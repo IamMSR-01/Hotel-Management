@@ -43,14 +43,22 @@ const userSchema = new Schema(
     },
     avatar: {
       type: String,
-    //   default: ""
+      //   default: ""
     },
     refreshToken: {
       type: String,
-      default: null
+      select: false,
     },
+    bookings: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Booking",
+      },
+    ],
   },
   { timestamps: true }
 );
+
+userSchema.index({ username: 1 });
 
 const User = mongoose.model("User", userSchema);
