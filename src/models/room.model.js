@@ -1,4 +1,5 @@
 import mongoose, {Schema} from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const roomSchema = new Schema({
     title:{
@@ -65,6 +66,8 @@ const roomSchema = new Schema({
 roomSchema.index({location: "2dsphere"})
 roomSchema.index({price: 1})
 roomSchema.index({slug: 1})
+
+roomSchema.plugin(mongooseAggregatePaginate)
 
 
 const Room = mongoose.model("Room", roomSchema);
