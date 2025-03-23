@@ -70,4 +70,4 @@ roomSchema.index({slug: 1})
 roomSchema.plugin(mongooseAggregatePaginate)
 
 
-const Room = mongoose.model("Room", roomSchema);
+export const Room = mongoose.model("Room", roomSchema);

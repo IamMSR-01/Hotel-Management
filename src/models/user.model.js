@@ -9,20 +9,17 @@ const userSchema = new Schema(
       required: true,
       lowercase: true,
       unique: true,
-      trim: true,
       index: true,
     },
     fullName: {
       type: String,
       required: true,
-      trim: true,
     },
     email: {
       type: String,
       required: true,
       lowercase: true,
       unique: true,
-      trim: true,
     },
     password: {
       type: String,
@@ -31,10 +28,8 @@ const userSchema = new Schema(
     },
     phoneNumber: {
       type: String,
-      required: true,
-      unique: true,
-      sparse: true,
-      trim: true,
+      // required: true,
+      // unique: true,
     },
     role: {
       type: String,
@@ -48,7 +43,6 @@ const userSchema = new Schema(
     },
     refreshToken: {
       type: String,
-      select: false,
     },
     bookings: [
       {
@@ -93,6 +87,5 @@ userSchema.methods.generateRefreshToken = function () {
   )
 };
 
-userSchema.index({ username: 1 });
 
-const User = mongoose.model("User", userSchema);
+export const User = mongoose.model("User", userSchema);
