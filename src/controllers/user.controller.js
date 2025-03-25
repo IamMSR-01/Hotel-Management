@@ -4,10 +4,6 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
-import { Booking } from "../models/booking.model.js";
-import { Room } from "../models/room.model.js";
-import { Payment } from "../models/payment.model.js";
-import { Review } from "../models/review.model.js";
 import mongoose from "mongoose";
 
 const generateAccessAndRefreshToken = async (userId) => {
@@ -155,7 +151,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   const incommingRefreshToken =
     req.cookies?.refreshToken || req.body.refreshToken;
   if (!incommingRefreshToken) {
-    throw new ApiError(500, "Unauthorized request");
+    throw new ApiError(401, "Unauthorized request");
   }
 
   try {
@@ -202,10 +198,17 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
   const user = await User.findById(req.user?._id);
+  if (!user) {
+    throw new ApiError(404, "User not found while changing password");
+  }
 
   const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
   if (!isPasswordCorrect) {
-    throw new ApiError(201, "Invalid old password");
+    throw new ApiError(400, "Invalid old password");
+  }
+
+  if (newPassword.length < 8) {
+    throw new ApiError(400, "Password must be at least 8 characters long");
   }
 
   user.password = newPassword;
@@ -226,7 +229,19 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { fullName, email } = req.body;
   if (!fullName || !email) {
-    throw new ApiError(401, "FullName and Email are required");
+    throw new ApiError(400, "FullName and Email are required");
+  }
+
+  // Validate email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new ApiError(400, "Invalid email format");
+  }
+
+  // Check if email is already taken
+  const existingUser = await User.findOne({ email });
+  if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
+    throw new ApiError(400, "Email is already in use by another account");
   }
 
   const user = await User.findByIdAndUpdate(
@@ -240,6 +255,10 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     { new: true }
   ).select("-password");
 
+  if (!user) {
+    throw new ApiError(404, "User not found while updating profile");
+  }
+
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Account details update successfully"));
@@ -248,7 +267,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
   if (!avatarLocalPath) {
-    throw new ApiError(401, "Avatar file is missing");
+    throw new ApiError(400, "Avatar file is missing");
   }
 
   const avatar = await uploadOnCloudinary(avatarLocalPath);
@@ -269,6 +288,25 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Avatar is updated successfully"));
+});
+
+const updatePhoneNumber = asyncHandler(async (req, res) => {
+  const { phoneNumber } = req.body;
+  if (!phoneNumber) {
+    throw new ApiError(400, "Phone number is required");
+  }
+
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  user.phoneNumber = phoneNumber;
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Phone number is updated successfully"));
 });
 
 const getUserProfile = asyncHandler(async (req, res) => {
@@ -363,4 +401,5 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   getUserProfile,
+  updatePhoneNumber,
 };
