@@ -4,6 +4,10 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
+import { Booking } from "../models/booking.model.js";
+import { Room } from "../models/room.model.js";
+import { Payment } from "../models/payment.model.js";
+import { Review } from "../models/review.model.js";
 import mongoose from "mongoose";
 
 const generateAccessAndRefreshToken = async (userId) => {
@@ -267,6 +271,88 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Avatar is updated successfully"));
 });
 
+  const getUserProfile = asyncHandler(async (req, res) => {
+    try {
+      const userId = req.params.id;
+      if (!userId) {
+        throw new ApiError(400, "User id is missing");
+      }
+
+      const userProfile = await User.aggregate([
+        {
+          $match: { _id: new mongoose.Types.ObjectId(userId) },
+        },
+        {
+          $lookup: {
+            from: "bookings",
+            localField: "_id",
+            foreignField: "userId",
+            as: "bookings",
+          },
+        },
+        {
+          $unwind: {
+            path: "$bookings",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $lookup: {
+            from: "rooms",
+            localField: "bookings.roomId",
+            foreignField: "_id",
+            as: "bookings.roomDetails",
+          },
+        },
+        {
+          $lookup: {
+            from: "payments",
+            localField: "bookings._id",
+            foreignField: "bookingId",
+            as: "bookings.paymentDetails",
+          },
+        },
+        {
+          $lookup: {
+            from: "reviews",
+            localField: "_id",
+            foreignField: "userId",
+            as: "reviews",
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            username: { $first: "$username" },
+            fullName: { $first: "$fullName" },
+            email: { $first: "$email" },
+            phoneNumber: { $first: "$phoneNumber" },
+            avatar: { $first: "$avatar" },
+            bookings: { $push: "$bookings" },
+            reviews: { $first: "$reviews" },
+          },
+        },
+      ]);
+
+      if (!userProfile.length) {
+        throw new ApiError(404, "User not found");
+      }
+
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(200, userProfile[0], "User retrieved successfully")
+        );
+    } catch (error) {
+      console.error(error);
+      throw new ApiError(
+        500,
+        error?.message,
+        "Internal server error while retrieving user profile"
+      );
+    }
+  });
+
 export {
   registerUser,
   loginUser,
@@ -275,5 +361,6 @@ export {
   changeCurrentPassword,
   getCurrentUser,
   updateAccountDetails,
-  updateUserAvatar
+  updateUserAvatar,
+  getUserProfile,
 };
