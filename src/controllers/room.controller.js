@@ -61,14 +61,70 @@ const addRoom = asyncHandler(async (req, res) => {
 });
 
 const getAllRooms = asyncHandler(async (req, res) => {
-  const rooms = await Room.find().sort({ createdAt: -1 });
-  if (!rooms.length) {
-    throw new ApiError(404, "No rooms avaliable");
+  const {
+    search,
+    minPrice,
+    maxPrice,
+    amenities,
+    sortBy,
+    page = 1,
+    limit = 10,
+  } = req.query;
+
+  const filter = {};
+
+  if (search) {
+    filter.$or = [
+      {
+        title: {
+          $regex: search,
+          $options: "i",
+        },
+      },
+      {
+        description: {
+          $regex: search,
+          $options: "i",
+        },
+      },
+    ];
+  }
+
+  if (maxPrice || minPrice) {
+    filter.price = {};
+    if (minPrice) filter.price.$gte = Number(minPrice);
+
+    if (maxPrice) filter.price.$lte = Number(maxPrice);
+  }
+
+  if (maxGuests) {
+    filter.maxGuests = { $gte: Number(maxGuests) };
+  }
+
+  if (amenities) {
+    const amenitiesArray = amenities.split(",");
+    filter.amenities = { $all: amenitiesArray };
+  }
+
+  let sortOptions = { createdAt: -1 };
+  if (sortBy === "price_asc") sortOptions = { price: 1 };
+  if (sortBy === "price_desc") sortOptions = { price: -1 };
+
+  const options = {
+    page: Number(page),
+    limit: Number(limit),
+    sort: sortOptions,
+  };
+
+  const rooms = await Room.paginate(filter, options);
+
+  if (!rooms.docs.length) {
+    throw new ApiError(404, "No room is available");
   }
 
   return res
     .status(200)
-    .json(new ApiResponse(200, { rooms }, "Rooms are retrived successfully"));
+    .json(new ApiResponse(200, rooms, "Rooms retrieved successfully"));
 });
 
 const getRoomBySlug = asyncHandler(async (req, res) => {
