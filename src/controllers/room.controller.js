@@ -68,4 +68,20 @@ const getAllRooms = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { rooms }, "Rooms are retrived successfully"));
 });
 
-export { addRoom, getAllRooms };
+const getRoomBySlug = asyncHandler(async (req, res) => {
+  const { slug } = req.params;
+  if (!slug) {
+    throw new ApiError(400, "Slug is required");
+  }
+
+  const room = await Room.findOne({ slug });
+  if (!room) {
+    throw new ApiError(404, "Room not available");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { room }, "Room retrieved  successfully"));
+});
+
+export { addRoom, getAllRooms, getRoomBySlug };
