@@ -6,9 +6,17 @@ import slugify from "slugify";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const addRoom = asyncHandler(async (req, res) => {
-  const { title, description, price, maxGuests, amenities, location } = req.body;
+  const { title, description, price, maxGuests, amenities, location } =
+    req.body;
 
-  if (!title || !description || !price || !maxGuests || !amenities || !location) {
+  if (
+    !title ||
+    !description ||
+    !price ||
+    !maxGuests ||
+    !amenities ||
+    !location
+  ) {
     throw new ApiError(400, "All fields are required");
   }
 
@@ -44,7 +52,20 @@ const addRoom = asyncHandler(async (req, res) => {
     location: parsedLocation,
   });
 
-  return res.status(201).json(new ApiResponse(201, { room: newRoom }, "Room added successfully"));
+  return res
+    .status(201)
+    .json(new ApiResponse(201, { room: newRoom }, "Room added successfully"));
 });
 
-export { addRoom };
+const getAllRooms = asyncHandler(async (req, res) => {
+  const rooms = await Room.find().sort({ createdAt: -1 });
+  if (!rooms.length) {
+    throw new ApiError(404, "No rooms avaliable");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { rooms }, "Rooms are retrived successfully"));
+});
+
+export { addRoom, getAllRooms };
