@@ -3,7 +3,10 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import slugify from "slugify";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  deleteFromCloudinary,
+  uploadOnCloudinary,
+} from "../utils/cloudinary.js";
 
 const addRoom = asyncHandler(async (req, res) => {
   const { title, description, price, maxGuests, amenities, location } =
@@ -145,4 +148,26 @@ const updateRoom = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { room }, "Room updated successfully"));
 });
 
-export { addRoom, getAllRooms, getRoomBySlug, updateRoom };
+const deleteRoom = asyncHandler(async (req, res) => {
+  const { slug } = req.params;
+  if (!slug) {
+    throw new ApiError(400, "Slug is required");
+  }
+
+  const room = await Room.findOne({ slug });
+  if (!room) {
+    throw new ApiError(404, "Room not found");
+  }
+
+  for (const imgUrl of room.images) {
+    await deleteFromCloudinary(imgUrl);
+  }
+
+  await room.deleteOne();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Room deleted successfully"));
+});
+
+export { addRoom, getAllRooms, getRoomBySlug, updateRoom, deleteRoom };
