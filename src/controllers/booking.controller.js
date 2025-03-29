@@ -74,12 +74,52 @@ const createBooking = asyncHandler(async (req, res) => {
   }
 });
 const updateBooking = asyncHandler(async (req, res) => {
-    const { bookingId } = req.params;
-    const { checkInDate, checkOutDate } = req.body;
-  
-    if (new Date(checkInDate) >= new Date(checkOutDate)) {
-      throw new ApiError(400, "Check-out date must be after check-in date");
+  const { bookingId } = req.params;
+  const { checkInDate, checkOutDate } = req.body;
+
+  if (new Date(checkInDate) >= new Date(checkOutDate)) {
+    throw new ApiError(400, "Check-out date must be after check-in date");
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const booking = await Booking.findById(bookingId).session(session);
+    if (!booking) throw new ApiError(404, "Booking not found");
+
+    const existingBooking = await Booking.findOne({
+      roomId: booking.roomId,
+      checkInDate: { $lt: checkOutDate },
+      checkOutDate: { $gt: checkInDate },
+      status: { $ne: "Cancelled" },
+      _id: { $ne: bookingId },
+    }).session(session);
+
+    if (existingBooking) {
+      throw new ApiError(400, "Room is already booked for selected dates");
     }
+
+    booking.checkInDate = checkInDate;
+    booking.checkOutDate = checkOutDate;
+    await booking.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, { booking }, "Booking updated successfully"));
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw new ApiError(500, "Internal server error | Booking update failed");
+  }
+});
+
+
+const deleteBooking = asyncHandler(async (req, res) => {
+    const { bookingId } = req.params;
   
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -88,20 +128,11 @@ const updateBooking = asyncHandler(async (req, res) => {
       const booking = await Booking.findById(bookingId).session(session);
       if (!booking) throw new ApiError(404, "Booking not found");
   
-      const existingBooking = await Booking.findOne({
-        roomId: booking.roomId,
-        checkInDate: { $lt: checkOutDate },
-        checkOutDate: { $gt: checkInDate },
-        status: { $ne: "Cancelled" },
-        _id: { $ne: bookingId },
-      }).session(session);
-  
-      if (existingBooking) {
-        throw new ApiError(400, "Room is already booked for selected dates");
+      if (booking.status === "Cancelled") {
+        throw new ApiError(400, "Booking is already cancelled");
       }
   
-      booking.checkInDate = checkInDate;
-      booking.checkOutDate = checkOutDate;
+      booking.status = "Cancelled";
       await booking.save({ session });
   
       await session.commitTransaction();
@@ -109,12 +140,13 @@ const updateBooking = asyncHandler(async (req, res) => {
   
       return res
         .status(200)
-        .json(new ApiResponse(200, { booking }, "Booking updated successfully"));
+        .json(new ApiResponse(200, { booking }, "Booking cancelled successfully"));
     } catch (error) {
       await session.abortTransaction();
       session.endSession();
-      throw new ApiError(500, "Internal server error | Booking update failed");
+      throw new ApiError(500, "Internal server error | Booking cancellation failed");
     }
   });
   
-export { createBooking, updateBooking };
+
+export { createBooking, updateBooking, deleteBooking };
