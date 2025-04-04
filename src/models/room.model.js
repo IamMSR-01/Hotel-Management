@@ -20,7 +20,6 @@ const roomSchema = new Schema({
     price: {
         type: Number,
         required: true,
-        index: true,
     },
     maxGuests: {
         type: Number,
@@ -65,7 +64,6 @@ const roomSchema = new Schema({
 // indexing for optimization
 roomSchema.index({location: "2dsphere"})
 roomSchema.index({price: 1})
-roomSchema.index({slug: 1})
 
 roomSchema.plugin(mongooseAggregatePaginate)
 

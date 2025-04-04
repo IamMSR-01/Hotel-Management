@@ -20,10 +20,15 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 // import routes
-import userRouter from "./routes/user.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import roomRoutes from "./routes/room.routes.js";
+import bookingRoutes from "./routes/booking.routes.js";
 
 
-// routes decleration
-app.use("/api/v1/users", userRouter);
+// declared routes
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/rooms", roomRoutes);
+app.use("/api/v1/bookings", bookingRoutes);
+
 
 export { app };
