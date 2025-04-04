@@ -6,11 +6,15 @@ import { Room } from "../models/room.model.js";
 import mongoose from "mongoose";
 
 const createBooking = asyncHandler(async (req, res) => {
-  const { roomId, userId, checkInDate, checkOutDate, guests } = req.body;
+  const { roomId, checkInDate, checkOutDate, guests } = req.body;
+  const userId = req.user._id;
 
   // Validate required fields
-  if (!roomId || !userId || !checkInDate || !checkOutDate || !guests) {
+  if (!roomId || !checkInDate || !checkOutDate || !guests) {
     throw new ApiError(400, "All fields are required");
+  }
+  if (!userId) {
+    throw new ApiError(400, "User Id is missing");
   }
 
   // Ensure check-in date is before check-out date
@@ -54,7 +58,7 @@ const createBooking = asyncHandler(async (req, res) => {
             checkOutDate,
             totalPrice,
             status: "Pending",
-            paymentStatus: "pending",
+            paymentStatus: "Pending",
           },
         ],
         { session }
@@ -117,36 +121,59 @@ const updateBooking = asyncHandler(async (req, res) => {
   }
 });
 
-
 const deleteBooking = asyncHandler(async (req, res) => {
-    const { bookingId } = req.params;
-  
-    const session = await mongoose.startSession();
-    session.startTransaction();
-  
-    try {
-      const booking = await Booking.findById(bookingId).session(session);
-      if (!booking) throw new ApiError(404, "Booking not found");
-  
-      if (booking.status === "Cancelled") {
-        throw new ApiError(400, "Booking is already cancelled");
-      }
-  
-      booking.status = "Cancelled";
-      await booking.save({ session });
-  
-      await session.commitTransaction();
-      session.endSession();
-  
-      return res
-        .status(200)
-        .json(new ApiResponse(200, { booking }, "Booking cancelled successfully"));
-    } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
-      throw new ApiError(500, "Internal server error | Booking cancellation failed");
-    }
-  });
-  
+  const { bookingId } = req.params;
 
-export { createBooking, updateBooking, deleteBooking };
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const booking = await Booking.findById(bookingId).session(session);
+    if (!booking) throw new ApiError(404, "Booking not found");
+
+    if (booking.status === "Cancelled") {
+      throw new ApiError(400, "Booking is already cancelled");
+    }
+
+    booking.status = "Cancelled";
+    await booking.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, { booking }, "Booking cancelled successfully")
+      );
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw new ApiError(
+      500,
+      "Internal server error | Booking cancellation failed"
+    );
+  }
+});
+
+const getBookingById = asyncHandler(async (req, res) => {
+  const { bookingId } = req.params;
+  if (!bookingId) {
+    throw new ApiError(400, "Booking Id is missing");
+  }
+
+  const booking = await Booking.findById(bookingId)
+    .populate("userId", "name email")
+    .populate("roomId", "name price")
+    .exec();
+
+  if (!booking) {
+    throw new ApiError(404, "Booking not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { booking }, "Booking fatched successfully"));
+});
+
+export { createBooking, updateBooking, deleteBooking, getBookingById };
