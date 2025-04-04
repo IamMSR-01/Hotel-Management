@@ -38,8 +38,8 @@ const bookingSchema = new Schema({
     },
     paymentStatus: {
         type: String,
-        enum: ['pending', 'failed', 'Paid'],
-        default: 'pending'
+        enum: ['Pending', 'Failed', 'Paid'],
+        default: 'Pending'
     }
 
 

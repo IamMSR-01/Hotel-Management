@@ -163,8 +163,8 @@ const getBookingById = asyncHandler(async (req, res) => {
   }
 
   const booking = await Booking.findById(bookingId)
-    .populate("userId", "name email")
-    .populate("roomId", "name price")
+    .populate("userId", "fullName email")
+    .populate("roomId", "title price")
     .exec();
 
   if (!booking) {
@@ -173,7 +173,116 @@ const getBookingById = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, { booking }, "Booking fatched successfully"));
+    .json(new ApiResponse(200, { booking }, "Booking fetched successfully"));
 });
 
-export { createBooking, updateBooking, deleteBooking, getBookingById };
+const getUserBookings = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  if (!userId) {
+    throw new ApiError(400, "User id is missing");
+  }
+
+  const bookings = await Booking.find({ userId })
+    .populate("roomId", "title price")
+    .sort({ createdAt: -1 });
+
+  if (bookings.length === 0) {
+    throw new ApiError(404, "Booking not found");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, { bookings }, "All bookings fetched successfully")
+    );
+});
+const getAllBookings = asyncHandler(async (req, res) => {
+  const {
+    page = 1,
+    limit = 10,
+    status,
+    paymentStatus,
+    search = "",
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = req.query;
+
+  const matchStage = {};
+
+  if (status) matchStage.status = status;
+  if (paymentStatus) matchStage.paymentStatus = paymentStatus;
+
+  const aggregateQuery = Booking.aggregate([
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    { $unwind: "$user" },
+    {
+      $lookup: {
+        from: "rooms",
+        localField: "roomId",
+        foreignField: "_id",
+        as: "room",
+      },
+    },
+    { $unwind: "$room" },
+    {
+      $match: {
+        ...matchStage,
+        ...(search && {
+          $or: [
+            { "user.fullName": { $regex: search, $options: "i" } },
+            { "user.email": { $regex: search, $options: "i" } },
+          ],
+        }),
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        checkInDate: 1,
+        checkOutDate: 1,
+        totalPrice: 1,
+        status: 1,
+        paymentStatus: 1,
+        createdAt: 1,
+        "user.fullName": 1,
+        "user.email": 1,
+        "room.title": 1,
+        "room.price": 1,
+      },
+    },
+    {
+      $sort: { [sortBy]: sortOrder === "asc" ? 1 : -1 },
+    },
+  ]);
+
+  const options = {
+    page: parseInt(page, 10),
+    limit: parseInt(limit, 10),
+  };
+
+  const bookings = await Booking.aggregatePaginate(aggregateQuery, options);
+
+  if (!bookings || bookings.docs.length === 0) {
+    throw new ApiError(404, "No bookings found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, bookings, "Bookings fetched successfully"));
+});
+
+export {
+  createBooking,
+  updateBooking,
+  deleteBooking,
+  getBookingById,
+  getUserBookings,
+  getAllBookings,
+};
