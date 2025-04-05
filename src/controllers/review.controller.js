@@ -68,4 +68,93 @@ const updateReview = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, review, "Review updated succussfully"));
 });
 
-export { createReview, updateReview };
+const deleteReview = asyncHandler(async (req, res) => {
+  const reviewId = req.params.id;
+  const userId = req.user._id;
+
+  if (!reviewId) {
+    throw new ApiError(400, "review id required");
+  }
+  if (!userId) {
+    throw new ApiError(400, "user id required");
+  }
+
+  const review = await Review.findById(reviewId);
+  if (!review) {
+    throw new ApiError(404, "review not found");
+  }
+
+  if (review.userId.toString() !== userId.toString()) {
+    throw new ApiError(403, "You are not authorized to delete this review");
+  }
+
+  await review.deleteOne();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "review deleted successfully"));
+});
+
+const getUserReview = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  if (!userId) {
+    throw new ApiError(400, "user id required");
+  }
+
+  const reviews = await Review.find({ userId })
+    .populate("roomId", "title price location images")
+    .sort({ createdAt: -1 });
+
+  if (reviews.length === 0) {
+    throw new ApiError(404, "No review is found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, reviews, "Your reviews fetched successfully"));
+});
+
+const getRoomReview = asyncHandler(async (req, res) => {
+  const { roomId } = req.params;
+  if (!roomId) {
+    throw new ApiError(400, "room id is required");
+  }
+
+  const reviews = await Review.find({ roomId })
+    .populate("userId", "fullName avatar")
+    .sort({ createdAt: -1 });
+
+  if (reviews.length === 0) {
+    throw new ApiError(404, "No review is found for this room");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, reviews, "Reviews for the room fetched successfully")
+    );
+});
+
+const getAllReviews = asyncHandler(async (req, res) => {
+  const reviews = await Review.find({})
+    .populate("userId", "fullName email")
+    .populate("roomId", "title location price")
+    .sort({ createdAt: -1 });
+
+  if (!reviews || reviews.length === 0) {
+    throw new ApiError(404, "No review is found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, reviews, "All reviews fetched successfully"));
+});
+
+export {
+  createReview,
+  updateReview,
+  deleteReview,
+  getUserReview,
+  getRoomReview,
+  getAllReviews,
+};

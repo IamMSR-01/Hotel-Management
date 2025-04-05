@@ -23,12 +23,13 @@ app.use(cookieParser());
 import userRoutes from "./routes/user.routes.js";
 import roomRoutes from "./routes/room.routes.js";
 import bookingRoutes from "./routes/booking.routes.js";
-
+import reviewRoutes from "./routes/review.routes.js"
 
 // declared routes
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/rooms", roomRoutes);
 app.use("/api/v1/bookings", bookingRoutes);
+app.use("/api/v1/reviews", reviewRoutes)
 
 
 export { app };
