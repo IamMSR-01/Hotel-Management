@@ -9,6 +9,8 @@ import {
   updateUserProfile
 } from "../controllers/user.controller.js";
 import { varifyJwt } from "../middlewares/auth.middleware.js";
+import { upload } from "../middlewares/multer.middleware.js";
+
 
 const router = express.Router();
 
@@ -19,7 +21,7 @@ router.post("/refresh-token", refreshAccessToken);
 
 // 🔐 Protected Routes
 router.post("/logout", varifyJwt, logoutUser);
-router.put("/avatar", varifyJwt, updateUserAvatar);
+router.put("/avatar", varifyJwt, upload.single("avatar"), updateUserAvatar);
 router.put("/profile", varifyJwt, updateUserProfile);
 router.get("/profile/me", varifyJwt, getUserProfile);
 

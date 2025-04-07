@@ -109,10 +109,16 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     req.cookies?.refreshToken || req.body.refreshToken;
   if (!incommingRefreshToken) throw new ApiError(401, "Unauthorized request");
 
-  const decodedToken = jwt.verify(
-    incommingRefreshToken,
-    process.env.REFRESH_TOKEN_SECRET
-  );
+  let decodedToken;
+  try {
+    decodedToken = jwt.verify(
+      incommingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+  } catch (err) {
+    throw new ApiError(401, "Invalid or expired refresh token");
+  }
+
   const user = await User.findById(decodedToken?._id);
   if (!user || incommingRefreshToken !== user.refreshToken)
     throw new ApiError(401, "Invalid refresh token");
@@ -218,14 +224,11 @@ const getUserProfile = asyncHandler(async (req, res) => {
 });
 
 const updateUserProfile = asyncHandler(async (req, res) => {
-  const { fullName, email, phoneNumber, username } = req.body;
-  if (
-    !fullName?.trim() ||
-    !email?.trim() ||
-    !phoneNumber?.trim() ||
-    !username?.trim()
-  )
+  const { username, fullName, email, phoneNumber } = req.body;
+  if (!username || !fullName || !email || !phoneNumber?.trim()) {
+    console.log("Update data:", { username, fullName, email, phoneNumber });
     throw new ApiError(400, "All fields are required");
+  }
 
   const existingUser = await User.findOne({
     $or: [{ email }, { username }],
