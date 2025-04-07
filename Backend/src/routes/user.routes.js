@@ -6,6 +6,7 @@ import {
   refreshAccessToken,
   updateUserAvatar,
   getUserProfile,
+  updateUserProfile
 } from "../controllers/user.controller.js";
 import { varifyJwt } from "../middlewares/auth.middleware.js";
 
@@ -19,6 +20,7 @@ router.post("/refresh-token", refreshAccessToken);
 // 🔐 Protected Routes
 router.post("/logout", varifyJwt, logoutUser);
 router.put("/avatar", varifyJwt, updateUserAvatar);
-router.get("/profile", varifyJwt, getUserProfile);
+router.put("/profile", varifyJwt, updateUserProfile);
+router.get("/profile/me", varifyJwt, getUserProfile);
 
 export default router;
