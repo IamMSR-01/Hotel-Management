@@ -22,8 +22,8 @@ const Rooms = () => {
 
       console.log("API Response:", data);
 
-      if (data?.data?.docs) {
-        setRooms(data.data.docs);
+      if (data?.message?.docs) {
+        setRooms(data.message.docs); // ✅ Corrected here
       } else {
         setRooms([]); // fallback
       }

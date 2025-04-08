@@ -71,54 +71,54 @@ const getAllRooms = asyncHandler(async (req, res) => {
     sortBy,
     page = 1,
     limit = 10,
+    maxGuests,
   } = req.query;
 
-  const filter = {};
+  const matchStage = {};
 
   if (search) {
-    filter.$or = [
+    matchStage.$or = [
       {
-        title: {
-          $regex: search,
-          $options: "i",
-        },
+        title: { $regex: search, $options: "i" },
       },
       {
-        description: {
-          $regex: search,
-          $options: "i",
-        },
+        description: { $regex: search, $options: "i" },
       },
     ];
   }
 
-  if (maxPrice || minPrice) {
-    filter.price = {};
-    if (minPrice) filter.price.$gte = Number(minPrice);
+  const isValidNumber = (val) => !isNaN(val) && val !== "";
 
-    if (maxPrice) filter.price.$lte = Number(maxPrice);
+  if (isValidNumber(minPrice) || isValidNumber(maxPrice)) {
+    matchStage.price = {};
+    if (isValidNumber(minPrice)) matchStage.price.$gte = Number(minPrice);
+    if (isValidNumber(maxPrice)) matchStage.price.$lte = Number(maxPrice);
   }
 
-  if (maxGuests) {
-    filter.maxGuests = { $gte: Number(maxGuests) };
+  if (isValidNumber(maxGuests)) {
+    matchStage.maxGuests = { $gte: Number(maxGuests) };
   }
 
   if (amenities) {
     const amenitiesArray = amenities.split(",");
-    filter.amenities = { $all: amenitiesArray };
+    matchStage.amenities = { $all: amenitiesArray };
   }
 
-  let sortOptions = { createdAt: -1 };
-  if (sortBy === "price_asc") sortOptions = { price: 1 };
-  if (sortBy === "price_desc") sortOptions = { price: -1 };
+  let sortStage = { createdAt: -1 };
+  if (sortBy === "price_asc") sortStage = { price: 1 };
+  if (sortBy === "price_desc") sortStage = { price: -1 };
+
+  const aggregate = Room.aggregate([
+    { $match: matchStage },
+    { $sort: sortStage },
+  ]);
 
   const options = {
     page: Number(page),
     limit: Number(limit),
-    sort: sortOptions,
   };
 
-  const rooms = await Room.paginate(filter, options);
+  const rooms = await Room.aggregatePaginate(aggregate, options);
 
   if (!rooms.docs.length) {
     throw new ApiError(404, "No room is available");
@@ -128,6 +128,7 @@ const getAllRooms = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, rooms, "Rooms retrieved successfully"));
 });
+
 
 const getRoomBySlug = asyncHandler(async (req, res) => {
   const { slug } = req.params;
