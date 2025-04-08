@@ -8,6 +8,7 @@ import {
 } from "../controllers/room.controller.js";
 import { varifyJwt } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.middleware.js";
+import { upload } from "../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
@@ -20,8 +21,10 @@ router.post(
   "/",
   varifyJwt,
   authorizeRoles("admin"),
+  upload.array("images", 10),
   addRoom
 );
+
 
 router.put(
   "/:roomId",

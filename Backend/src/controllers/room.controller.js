@@ -11,6 +11,8 @@ import {
 const addRoom = asyncHandler(async (req, res) => {
   const { title, description, price, maxGuests, amenities, location } =
     req.body;
+  console.log("BODY:", req.body);
+  console.log("FILES:", req.files);
 
   if (
     !title ||

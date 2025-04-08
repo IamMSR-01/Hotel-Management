@@ -2,6 +2,7 @@ import Navbar from '../components/Navbar';
 import Features from '../components/Features';
 import RoomCard from '../components/RoomCard';
 import Footer from '../components/Footer';
+import { useNavigate } from 'react-router-dom';
 
 const rooms = [
   {
@@ -22,6 +23,7 @@ const rooms = [
 ];
 
 const Home = () => {
+  const navigate = useNavigate();
   return (
     <>
       <Navbar />
@@ -29,7 +31,9 @@ const Home = () => {
         <div className="text-center px-4">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">Welcome to StayEase 🏨</h2>
           <p className="text-lg text-gray-700 mb-6">Find your perfect stay at the best price!</p>
-          <button className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition">
+          <button 
+          onClick={() => navigate("/rooms")}
+          className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition">
             Book a Room
           </button>
         </div>

@@ -210,6 +210,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
         email: { $first: "$email" },
         phoneNumber: { $first: "$phoneNumber" },
         avatar: { $first: "$avatar" },
+        role: { $first: "$role" },
         bookings: { $push: "$bookings" },
         reviews: { $first: "$reviews" },
       },
