@@ -147,10 +147,10 @@ const getRoomBySlug = asyncHandler(async (req, res) => {
 });
 
 const updateRoom = asyncHandler(async (req, res) => {
-  const { title, description, price, maxGuests, amenities, location } = req.body;
+  const { title, description, price, maxGuests, amenities } = req.body;
   const { slug } = req.params;
 
-  if (!title || !description || !price || !maxGuests || !amenities || !location) {
+  if (!title || !description || !price || !maxGuests || !amenities) {
     throw new ApiError(400, "All fields are required");
   }
 
@@ -183,7 +183,7 @@ const updateRoom = asyncHandler(async (req, res) => {
       const uploaded = await uploadOnCloudinary(file.path);
       if (uploaded) uploadedImages.push(uploaded.url);
     }
-    room.images = [...room.images, ...uploadedImages];
+    room.images = [...uploadedImages, ...room.images];
   }
 
   // Update remaining fields
@@ -191,7 +191,6 @@ const updateRoom = asyncHandler(async (req, res) => {
   room.price = price;
   room.maxGuests = maxGuests;
   room.amenities = Array.isArray(amenities) ? amenities : JSON.parse(amenities);
-  room.location = location ? JSON.parse(location) : room.location;
 
   await room.save();
 
