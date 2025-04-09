@@ -26,7 +26,7 @@ const addRoom = asyncHandler(async (req, res) => {
   }
 
   // Slug Generate for room
-  const slug = slugify(title, { lower: true });
+  const slug = slugify(title, { lower: true }) + "-" + Date.now();
 
   // Handle Image Upload
   const uploadedImages = [];
@@ -126,7 +126,7 @@ const getAllRooms = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, rooms, "Rooms retrieved successfully"));
+    .json(new ApiResponse(200, {...rooms, user: req.user}, "Rooms retrieved successfully"));
 });
 
 
@@ -147,19 +147,10 @@ const getRoomBySlug = asyncHandler(async (req, res) => {
 });
 
 const updateRoom = asyncHandler(async (req, res) => {
-  const { title, description, price, maxGuests, amenities, location } =
-    req.body;
-
+  const { title, description, price, maxGuests, amenities, location } = req.body;
   const { slug } = req.params;
 
-  if (
-    !title ||
-    !description ||
-    !price ||
-    !maxGuests ||
-    !amenities ||
-    !location
-  ) {
+  if (!title || !description || !price || !maxGuests || !amenities || !location) {
     throw new ApiError(400, "All fields are required");
   }
 
@@ -172,32 +163,34 @@ const updateRoom = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Room not found");
   }
 
-  // update slug if title is changed
-  const newSlug = slugify(title, { lower: true });
-  const slugExists = await Room.findOne({
-    slug: newSlug,
-    _id: { $ne: room._id },
-  });
-  if (slugExists) {
-    throw new ApiError(400, "A room with this title already exists");
+  // Update slug only if title is changed
+  if (title !== room.title) {
+    const newSlug = slugify(title, { lower: true });
+    const slugExists = await Room.findOne({ slug: newSlug, _id: { $ne: room._id } });
+
+    if (slugExists) {
+      throw new ApiError(400, "A room with this title already exists");
+    }
+
+    room.slug = newSlug;
+    room.title = title;
   }
 
+  // Upload new images if provided
   if (req.files && req.files.length > 0) {
     const uploadedImages = [];
     for (const file of req.files) {
       const uploaded = await uploadOnCloudinary(file.path);
-
       if (uploaded) uploadedImages.push(uploaded.url);
     }
     room.images = [...room.images, ...uploadedImages];
   }
 
-  room.title = title || room.title;
-  room.slug = newSlug || slug;
-  room.description = description || room.description;
-  room.price = price || room.price;
-  room.maxGuests = maxGuests || room.maxGuests;
-  room.amenities = amenities || room.amenities;
+  // Update remaining fields
+  room.description = description;
+  room.price = price;
+  room.maxGuests = maxGuests;
+  room.amenities = Array.isArray(amenities) ? amenities : JSON.parse(amenities);
   room.location = location ? JSON.parse(location) : room.location;
 
   await room.save();
@@ -206,6 +199,7 @@ const updateRoom = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, { room }, "Room updated successfully"));
 });
+
 
 const deleteRoom = asyncHandler(async (req, res) => {
   const { slug } = req.params;

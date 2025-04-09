@@ -20,10 +20,9 @@ const Rooms = () => {
       console.log("Fetching with query:", query);
       const { data } = await API.get("/rooms", { params: query });
 
-      console.log("API Response:", data);
 
       if (data?.message?.docs) {
-        setRooms(data.message.docs); // ✅ Corrected here
+        setRooms(data.message.docs); 
       } else {
         setRooms([]); // fallback
       }

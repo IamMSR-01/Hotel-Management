@@ -11,6 +11,7 @@ import EditProfile from "./pages/EditProfile";
 import UpdateAvatar from "./pages/UpdateAvatar";
 import AddRoom from "./pages/AddRoom";
 import Rooms from "./pages/Rooms";
+import AdminRooms from "./pages/AdminRooms";
 
 const App = () => {
   
@@ -26,6 +27,8 @@ const App = () => {
         <Route path="/update-avatar" element={<UpdateAvatar />} />
         <Route path="/add-room" element={ <AddRoom /> }/>
         <Route path="/rooms" element={<Rooms />} />
+        <Route path="/admin/rooms" element={<AdminRooms />} />
+
       </Routes>
     </>
   );

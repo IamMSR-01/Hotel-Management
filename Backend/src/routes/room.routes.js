@@ -13,7 +13,7 @@ import { upload } from "../middlewares/multer.middleware.js";
 const router = express.Router();
 
 // 🔓 Public Routes
-router.get("/", getAllRooms);
+router.get("/", varifyJwt, getAllRooms);
 router.get("/:slug", getRoomBySlug);
 
 // 🔐 Admin/Manager Routes
@@ -27,14 +27,15 @@ router.post(
 
 
 router.put(
-  "/:roomId",
+  "/:slug",
   varifyJwt,
   authorizeRoles("admin"),
+  upload.array("images", 10),
   updateRoom
 );
 
 router.delete(
-  "/:roomId",
+  "/:slug",
   varifyJwt,
   authorizeRoles("admin"),
   deleteRoom

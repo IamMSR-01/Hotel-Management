@@ -131,13 +131,13 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     .status(200)
     .cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "None",
+      secure: false,
+      sameSite: "Lax",
     })
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "None",
+      secure: false,
+      sameSite: "Lax",
     })
     .json(
       new ApiResponse(
