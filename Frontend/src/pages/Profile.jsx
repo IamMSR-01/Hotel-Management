@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchMe } from "../redux/slices/authSlice";
 import { useNavigate, useLocation } from "react-router-dom";
+
 function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -14,109 +15,99 @@ function Profile() {
   }, []);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="text-white text-center mt-10">Loading...</div>;
   }
 
   if (!user) {
-    return <div>Please login to view your profile</div>;
+    return <div className="text-white text-center mt-10">Please login to view your profile</div>;
   }
 
   const handleEdit = () => {
     navigate("/edit-profile");
   };
 
-  // Just replace your return() part with this 👇
-
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md space-y-6">
-      <div className="flex items-center space-x-4">
-        <img
-          src={user.avatar || "https://via.placeholder.com/150"}
-          alt="avatar"
-          className="w-24 h-24 rounded-full object-cover"
-        />
-        <button
-          onClick={() => navigate("/update-avatar")}
-          className="mt-2 text-blue-600 hover:underline block mx-auto"
-        >
-          Update Avatar
-        </button>
-        <div>
-          <h2 className="text-xl font-bold text-black">{user.fullName}</h2>
-          <p className="text-gray-600 capitalize">{user.role}</p>
+    <div
+      className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center"
+      style={{
+        backgroundImage:
+          "url('https://images.unsplash.com/photo-1527030280862-64139fba04ca?auto=format&fit=crop&w=1950&q=80')",
+      }}
+    >
+      <div className="w-full max-w-3xl p-8 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md shadow-2xl text-white">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+          <div className="flex flex-col items-center">
+            <img
+              src={user.avatar || "https://via.placeholder.com/150"}
+              alt="avatar"
+              className="w-40 h-40 rounded-full object-cover border-4 border-white/40 shadow-lg hover:scale-105 transition-transform duration-300"
+            />
+            <button
+              onClick={() => navigate("/update-avatar")}
+              className="mt-4 text-sm text-yellow-900 hover:text-yellow-200 bg-yellow-300 p-2 rounded hover:underline"
+            >
+              Update Avatar
+            </button>
+          </div>
+          <div className="flex-1 space-y-4">
+            <h2 className="text-4xl text-yellow-500 font-bold">{user.fullName}</h2>
+            <p className="text-medium text-green-300 capitalize">{user.role}</p>
+            <div className="grid grid-cols-1  gap-4">
+              <p className="flex gap-2"><strong>Username:</strong><p className="text-yellow-400">{user.username}</p> </p>
+              <p className="flex gap-2"><strong>Email:</strong><p className="text-yellow-400">{user.email}</p> </p>
+              <p className="flex gap-2"><strong>Phone:</strong><p className="text-yellow-400">{user.phoneNumber}</p> </p>
+            </div>
+            <button
+              onClick={handleEdit}
+              className="mt-4 px-5 py-2 bg-yellow-400 text-black font-semibold rounded-full shadow-md hover:bg-yellow-300 hover:scale-105 transition-transform duration-300"
+            >
+              ✏️ Edit Profile
+            </button>
+          </div>
         </div>
+
+        {user.role === "admin" && (
+          <div className="mt-10">
+            <h3 className="text-xl font-semibold text-green-300 mb-4">Admin Actions</h3>
+            <div className="flex gap-4 flex-wrap">
+              <button
+                onClick={() => navigate("/add-room")}
+                className="bg-green-600 px-5 py-2 rounded-full hover:bg-green-500 transition-all duration-300"
+              >
+                ➕ Add New Room
+              </button>
+              <button
+                onClick={() => navigate("/admin/rooms")}
+                className="bg-yellow-500 px-5 py-2 rounded-full hover:bg-yellow-400 transition-all duration-300"
+              >
+                🛠️ Manage All Rooms
+              </button>
+            </div>
+          </div>
+        )}
+
+        {user.role !== "admin" && (
+          <div className="mt-10">
+            <h3 className="text-xl font-semibold mb-4">My Bookings</h3>
+            {user?.bookings?.length > 0 ? (
+              user.bookings.map((booking, index) => (
+                <div
+                  key={index}
+                  className="mt-2 p-4 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm shadow-md"
+                >
+                  <p><strong>Room:</strong> {booking?.roomDetails?.[0]?.title}</p>
+                  <p><strong>Status:</strong> {booking?.status}</p>
+                  <p><strong>Check-in:</strong> {booking?.checkInDate}</p>
+                  <p><strong>Check-out:</strong> {booking?.checkOutDate}</p>
+                  <p><strong>Payment:</strong> {booking?.paymentDetails?.[0]?.status}</p>
+                </div>
+              ))
+            ) : (
+              <p>No bookings found.</p>
+            )}
+          </div>
+        )}
       </div>
-      <div className="space-y-2 text-black">
-        <p>
-          <strong>Username:</strong> {user.username}
-        </p>
-        <p>
-          <strong>Full Name:</strong> {user.fullName}
-        </p>
-        <p>
-          <strong>Email:</strong> {user.email}
-        </p>
-        <p>
-          <strong>Phone:</strong> {user.phoneNumber}
-        </p>
-      </div>
-      <button
-        onClick={handleEdit}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-      >
-        Edit Profile
-      </button>
-      {/* Show this only if user is 'admin' */}
-      {user.role === "admin" && (
-        <div className="mt-6 space-y-2">
-          <h2 className="text-lg font-semibold text-green-600">
-            Admin Actions
-          </h2>
-          <button
-            onClick={() => navigate("/add-room")}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          >
-            ➕ Add New Room
-          </button>
-          <button
-            onClick={() => navigate("/admin/rooms")}
-            className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-          >
-            🛠️ Manage All Rooms
-          </button>
-          {/* Add more admin buttons here if needed */}
-        </div>
-      )}
-      {/* Show only for normal users */}
-      {user.role !== "admin" && (
-        <div className="mt-4">
-          <h2 className="text-lg font-semibold">My Bookings</h2>
-          {user?.bookings?.length > 0 ? (
-            user.bookings.map((booking, index) => (
-              <div key={index} className="mt-2 p-3 border rounded-md">
-                <p>
-                  <strong>Room:</strong> {booking?.roomDetails?.[0]?.title}
-                </p>
-                <p>
-                  <strong>Status:</strong> {booking?.status}
-                </p>
-                <p>
-                  <strong>Check-in:</strong> {booking?.checkInDate}
-                </p>
-                <p>
-                  <strong>Check-out:</strong> {booking?.checkOutDate}
-                </p>
-                <p>
-                  <strong>Payment:</strong>{" "}
-                  {booking?.paymentDetails?.[0]?.status}
-                </p>
-              </div>
-            ))
-          ) : (
-            <p>No bookings found.</p>
-          )}
-        </div>
-      )}
     </div>
   );
 }
