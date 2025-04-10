@@ -118,35 +118,38 @@ const updateBooking = asyncHandler(async (req, res) => {
 });
 
 // Delete Booking (Soft delete)
+// controllers/bookingController.js
 const deleteBooking = asyncHandler(async (req, res) => {
   const { bookingId } = req.params;
-
   const session = await mongoose.startSession();
+
   try {
     session.startTransaction();
 
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+      await session.abortTransaction();
+      return res.status(400).json(new ApiResponse(400, null, "Invalid booking ID"));
+    }
+
     const booking = await Booking.findById(bookingId).session(session);
-    if (!booking) throw new ApiError(404, "Booking not found");
+    if (!booking) {
+      await session.abortTransaction();
+      return res.status(404).json(new ApiResponse(404, null, "Booking not found"));
+    }
 
     if (booking.status === "Cancelled") {
-      throw new ApiError(400, "Booking is already cancelled");
+      await session.abortTransaction();
+      return res.status(400).json(new ApiResponse(400, null, "Booking is already cancelled"));
     }
 
     booking.status = "Cancelled";
     await booking.save({ session });
 
     await session.commitTransaction();
-    res
-      .status(200)
-      .json(
-        new ApiResponse(200, { booking }, "Booking cancelled successfully")
-      );
+    return res.status(200).json(new ApiResponse(200, { booking }, "Booking cancelled successfully"));
   } catch (error) {
     await session.abortTransaction();
-    throw new ApiError(
-      500,
-      "Internal server error | Booking cancellation failed"
-    );
+    return res.status(500).json(new ApiResponse(500, null, error?.message || "Booking cancellation failed"));
   } finally {
     session.endSession();
   }

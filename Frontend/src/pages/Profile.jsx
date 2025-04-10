@@ -1,33 +1,41 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchMe } from "../redux/slices/authSlice";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import API from "../utils/axios";
+import { toast } from "react-hot-toast";
 
 function Profile() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const { user: userData, isLoading } = useSelector((state) => state.auth);
   const user = userData?.message;
-
-  const handleDeleteBooking = async (bookingId) => {
-    try {
-      await API.delete(`/bookings/${bookingId}`);
-      alert("Booking deleted successfully");
-      dispatch(fetchMe());
-    } catch (err) {
-      alert(err?.response?.data?.message || "Failed to delete booking");
-    }
-  };
-  
+  const [bookings, setBookings] = useState([]);
 
   useEffect(() => {
     dispatch(fetchMe());
-  }, []);
+  }, [dispatch]);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (user?.bookings) {
+      setBookings(user.bookings);
+    }
+  }, [user?.bookings]);
+
+  const handleDeleteBooking = async (bookingId) => {
+    try {
+      await API.delete(`/bookings/cancel/${bookingId}`);
+      toast.success("Booking cancelled successfully!");
+      setBookings((prev) => prev.filter((b) => b._id !== bookingId));
+    } catch (err) {
+      const msg = err?.response?.data?.message || "Failed to cancel booking";
+      toast.error(msg);
+      console.error("Delete Booking Error:", msg);
+    }
+  };
+
+  if (isLoading)
     return <div className="text-white text-center mt-10">Loading...</div>;
-  }
 
   if (!user) {
     return (
@@ -37,9 +45,7 @@ function Profile() {
     );
   }
 
-  const handleEdit = () => {
-    navigate("/edit-profile");
-  };
+  const handleEdit = () => navigate("/edit-profile");
 
   return (
     <div
@@ -50,6 +56,7 @@ function Profile() {
       }}
     >
       <div className="w-full mt-14 max-w-6xl p-8 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md shadow-2xl text-white">
+        {/* User Info */}
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <div className="flex flex-col items-center">
             <img
@@ -64,22 +71,23 @@ function Profile() {
               Update Avatar
             </button>
           </div>
+
           <div className="flex-1 space-y-4">
             <h2 className="text-4xl text-yellow-500 font-bold">
               {user.fullName}
             </h2>
             <p className="text-medium text-green-300 capitalize">{user.role}</p>
             <div className="grid grid-cols-1 gap-4">
-              <p className="flex gap-2">
-                <strong>Username:</strong>
+              <p>
+                <strong>Username:</strong>{" "}
                 <span className="text-yellow-400">{user.username}</span>
               </p>
-              <p className="flex gap-2">
-                <strong>Email:</strong>
+              <p>
+                <strong>Email:</strong>{" "}
                 <span className="text-yellow-400">{user.email}</span>
               </p>
-              <p className="flex gap-2">
-                <strong>Phone:</strong>
+              <p>
+                <strong>Phone:</strong>{" "}
                 <span className="text-yellow-400">{user.phoneNumber}</span>
               </p>
             </div>
@@ -92,6 +100,7 @@ function Profile() {
           </div>
         </div>
 
+        {/* Admin Actions */}
         {user.role === "admin" && (
           <div className="mt-10">
             <h3 className="text-xl font-semibold text-green-300 mb-4">
@@ -114,15 +123,17 @@ function Profile() {
           </div>
         )}
 
+        {/* My Bookings */}
         {user.role !== "admin" && (
           <div className="mt-10">
             <h3 className="text-xl font-semibold text-yellow-400 mb-6">
               My Bookings
             </h3>
-            {user?.bookings?.length > 0 ? (
+            {bookings?.length > 0 ? (
               <div className="grid sm:grid-cols-2 gap-6">
-                {user.bookings.map((booking, index) => {
+                {bookings.map((booking, index) => {
                   const room = booking?.roomDetails?.[0];
+
                   return (
                     <div
                       key={index}
@@ -146,6 +157,7 @@ function Profile() {
                         <p className="text-yellow-500">
                           ⭐ {room?.rating || 4.5} / 5
                         </p>
+
                         <div className="text-sm space-y-1 pt-2">
                           <p>
                             <strong>Check-in:</strong> {booking?.checkInDate}
@@ -164,9 +176,10 @@ function Profile() {
                             {booking?.paymentDetails?.[0]?.status}
                           </p>
                         </div>
+
                         <div className="flex flex-wrap gap-3 pt-4">
                           <button
-                            onClick={() => navigate(`/rooms/${booking?.roomDetails?.[0]?.slug}`)}
+                            onClick={() => navigate(`/rooms/${room?.slug}`)}
                             className="px-3 py-1 bg-blue-500 rounded hover:bg-blue-600 text-white"
                           >
                             🔍 View Details
@@ -179,12 +192,18 @@ function Profile() {
                           >
                             ✏️ Update
                           </button>
-                          <button
-                            onClick={() => handleDeleteBooking(booking._id)}
-                            className="px-3 py-1 bg-red-600 rounded hover:bg-red-500 text-white"
-                          >
-                            ❌ Delete
-                          </button>
+                          {booking.status !== "Cancelled" ? (
+                            <button
+                              className="bg-red-500 text-white px-4 py-1 rounded"
+                              onClick={() => handleDeleteBooking(booking._id)}
+                            >
+                              Cancel Booking
+                            </button>
+                          ) : (
+                            <span className="font-bold text-xl text-red-600 italic">
+                              Already Cancelled
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
