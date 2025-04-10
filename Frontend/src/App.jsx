@@ -13,6 +13,8 @@ import AddRoom from "./pages/AddRoom";
 import Rooms from "./pages/Rooms";
 import AdminRooms from "./pages/AdminRooms";
 import UpdateRoom from "./pages/UpdateRoom";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 
 const App = () => {
   
@@ -21,6 +23,8 @@ const App = () => {
       <Toaster position="top-right" reverseOrder={false} />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About/>} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile/:id" element={<Profile />} />
@@ -30,7 +34,7 @@ const App = () => {
         <Route path="/rooms" element={<Rooms />} />
         <Route path="/admin/rooms" element={<AdminRooms />} />
         <Route path="/update-room/:slug" element={<UpdateRoom />} />
-
+        
       </Routes>
     </>
   );

@@ -70,7 +70,7 @@ const getAllRooms = asyncHandler(async (req, res) => {
     amenities,
     sortBy,
     page = 1,
-    limit = 10,
+    limit = 12,
     maxGuests,
   } = req.query;
 

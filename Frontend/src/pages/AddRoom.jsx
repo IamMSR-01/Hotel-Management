@@ -52,7 +52,7 @@ function AddRoom() {
     roomData.append("description", formData.description);
     roomData.append("price", formData.price);
     roomData.append("maxGuests", formData.maxGuests);
-    roomData.append("amenities", JSON.stringify(formData.amenities.split(",").map(item => item.trim())));
+    roomData.append("amenities", formData.amenities.split(","));
     roomData.append(
       "location",
       JSON.stringify({
