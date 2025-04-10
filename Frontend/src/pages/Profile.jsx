@@ -10,6 +10,17 @@ function Profile() {
   const { user: userData, isLoading } = useSelector((state) => state.auth);
   const user = userData?.message;
 
+  const handleDeleteBooking = async (bookingId) => {
+    try {
+      await API.delete(`/bookings/${bookingId}`);
+      alert("Booking deleted successfully");
+      dispatch(fetchMe());
+    } catch (err) {
+      alert(err?.response?.data?.message || "Failed to delete booking");
+    }
+  };
+  
+
   useEffect(() => {
     dispatch(fetchMe());
   }, []);
@@ -38,7 +49,7 @@ function Profile() {
           "url('https://images.unsplash.com/photo-1527030280862-64139fba04ca?auto=format&fit=crop&w=1950&q=80')",
       }}
     >
-      <div className="w-full max-w-3xl p-8 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md shadow-2xl text-white">
+      <div className="w-full mt-14 max-w-6xl p-8 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md shadow-2xl text-white">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <div className="flex flex-col items-center">
             <img
@@ -105,37 +116,83 @@ function Profile() {
 
         {user.role !== "admin" && (
           <div className="mt-10">
-            <h3 className="text-xl font-semibold mb-4">My Bookings</h3>
+            <h3 className="text-xl font-semibold text-yellow-400 mb-6">
+              My Bookings
+            </h3>
             {user?.bookings?.length > 0 ? (
-              user.bookings.map((booking, index) => (
-                <div
-                  key={index}
-                  className="mt-2 cursor-pointer p-4 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm shadow-md"
-                >
-                  <div>
-                    <strong>Room:</strong>{" "}
-                    <span>{booking?.roomDetails?.[0]?.title}</span>
-                  </div>
-                  <div>
-                    <strong>Status:</strong>{" "}
-                    <span>{booking?.status}</span>
-                  </div>
-                  <div>
-                    <strong>Check-in:</strong>{" "}
-                    <span>{booking?.checkInDate}</span>
-                  </div>
-                  <div>
-                    <strong>Check-out:</strong>{" "}
-                    <span>{booking?.checkOutDate}</span>
-                  </div>
-                  <div>
-                    <strong>Payment:</strong>{" "}
-                    <span>{booking?.paymentDetails?.[0]?.status}</span>
-                  </div>
-                </div>
-              ))
+              <div className="grid sm:grid-cols-2 gap-6">
+                {user.bookings.map((booking, index) => {
+                  const room = booking?.roomDetails?.[0];
+                  return (
+                    <div
+                      key={index}
+                      className="bg-white/10 border border-white/20 rounded-xl overflow-hidden shadow-lg backdrop-blur-md"
+                    >
+                      <img
+                        src={
+                          room?.images?.[0] || "https://via.placeholder.com/300"
+                        }
+                        alt={room?.title}
+                        className="w-full h-48 object-cover"
+                      />
+                      <div className="p-4 text-white space-y-2">
+                        <h4 className="text-2xl font-bold text-yellow-300">
+                          {room?.title}
+                        </h4>
+                        <p className="text-sm text-gray-200">
+                          {room?.description?.slice(0, 100)}...
+                        </p>
+                        <p className="text-green-300">₹{room?.price} / night</p>
+                        <p className="text-yellow-500">
+                          ⭐ {room?.rating || 4.5} / 5
+                        </p>
+                        <div className="text-sm space-y-1 pt-2">
+                          <p>
+                            <strong>Check-in:</strong> {booking?.checkInDate}
+                          </p>
+                          <p>
+                            <strong>Check-out:</strong> {booking?.checkOutDate}
+                          </p>
+                          <p>
+                            <strong>Guests:</strong> {booking?.guests}
+                          </p>
+                          <p>
+                            <strong>Status:</strong> {booking?.status}
+                          </p>
+                          <p>
+                            <strong>Payment:</strong>{" "}
+                            {booking?.paymentDetails?.[0]?.status}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-3 pt-4">
+                          <button
+                            onClick={() => navigate(`/rooms/${booking?.roomDetails?.[0]?.slug}`)}
+                            className="px-3 py-1 bg-blue-500 rounded hover:bg-blue-600 text-white"
+                          >
+                            🔍 View Details
+                          </button>
+                          <button
+                            onClick={() =>
+                              navigate(`/bookings/update/${booking._id}`)
+                            }
+                            className="px-3 py-1 bg-yellow-400 text-black rounded hover:bg-yellow-300"
+                          >
+                            ✏️ Update
+                          </button>
+                          <button
+                            onClick={() => handleDeleteBooking(booking._id)}
+                            className="px-3 py-1 bg-red-600 rounded hover:bg-red-500 text-white"
+                          >
+                            ❌ Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
-              <p>No bookings found.</p>
+              <p className="text-white text-sm">No bookings found.</p>
             )}
           </div>
         )}

@@ -31,7 +31,6 @@ const Home = () => {
 
   return (
     <>
-      <Navbar />
 
       {/* Hero Section with Glass Effect */}
       <section className="min-h-[90vh] bg-[url('https://images.pexels.com/photos/261102/pexels-photo-261102.jpeg')] bg-cover bg-center flex items-center justify-center px-4 ">
@@ -80,7 +79,6 @@ const Home = () => {
         </div>
       </section>
 
-      <Footer />
     </>
   );
 };
