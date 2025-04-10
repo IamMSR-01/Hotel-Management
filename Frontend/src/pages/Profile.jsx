@@ -19,7 +19,11 @@ function Profile() {
   }
 
   if (!user) {
-    return <div className="text-white text-center mt-10">Please login to view your profile</div>;
+    return (
+      <div className="text-white text-center mt-10">
+        Please login to view your profile
+      </div>
+    );
   }
 
   const handleEdit = () => {
@@ -50,12 +54,23 @@ function Profile() {
             </button>
           </div>
           <div className="flex-1 space-y-4">
-            <h2 className="text-4xl text-yellow-500 font-bold">{user.fullName}</h2>
+            <h2 className="text-4xl text-yellow-500 font-bold">
+              {user.fullName}
+            </h2>
             <p className="text-medium text-green-300 capitalize">{user.role}</p>
-            <div className="grid grid-cols-1  gap-4">
-              <p className="flex gap-2"><strong>Username:</strong><p className="text-yellow-400">{user.username}</p> </p>
-              <p className="flex gap-2"><strong>Email:</strong><p className="text-yellow-400">{user.email}</p> </p>
-              <p className="flex gap-2"><strong>Phone:</strong><p className="text-yellow-400">{user.phoneNumber}</p> </p>
+            <div className="grid grid-cols-1 gap-4">
+              <p className="flex gap-2">
+                <strong>Username:</strong>
+                <span className="text-yellow-400">{user.username}</span>
+              </p>
+              <p className="flex gap-2">
+                <strong>Email:</strong>
+                <span className="text-yellow-400">{user.email}</span>
+              </p>
+              <p className="flex gap-2">
+                <strong>Phone:</strong>
+                <span className="text-yellow-400">{user.phoneNumber}</span>
+              </p>
             </div>
             <button
               onClick={handleEdit}
@@ -68,7 +83,9 @@ function Profile() {
 
         {user.role === "admin" && (
           <div className="mt-10">
-            <h3 className="text-xl font-semibold text-green-300 mb-4">Admin Actions</h3>
+            <h3 className="text-xl font-semibold text-green-300 mb-4">
+              Admin Actions
+            </h3>
             <div className="flex gap-4 flex-wrap">
               <button
                 onClick={() => navigate("/add-room")}
@@ -93,13 +110,28 @@ function Profile() {
               user.bookings.map((booking, index) => (
                 <div
                   key={index}
-                  className="mt-2 p-4 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm shadow-md"
+                  className="mt-2 cursor-pointer p-4 border border-white/20 rounded-lg bg-white/10 backdrop-blur-sm shadow-md"
                 >
-                  <p><strong>Room:</strong> {booking?.roomDetails?.[0]?.title}</p>
-                  <p><strong>Status:</strong> {booking?.status}</p>
-                  <p><strong>Check-in:</strong> {booking?.checkInDate}</p>
-                  <p><strong>Check-out:</strong> {booking?.checkOutDate}</p>
-                  <p><strong>Payment:</strong> {booking?.paymentDetails?.[0]?.status}</p>
+                  <div>
+                    <strong>Room:</strong>{" "}
+                    <span>{booking?.roomDetails?.[0]?.title}</span>
+                  </div>
+                  <div>
+                    <strong>Status:</strong>{" "}
+                    <span>{booking?.status}</span>
+                  </div>
+                  <div>
+                    <strong>Check-in:</strong>{" "}
+                    <span>{booking?.checkInDate}</span>
+                  </div>
+                  <div>
+                    <strong>Check-out:</strong>{" "}
+                    <span>{booking?.checkOutDate}</span>
+                  </div>
+                  <div>
+                    <strong>Payment:</strong>{" "}
+                    <span>{booking?.paymentDetails?.[0]?.status}</span>
+                  </div>
                 </div>
               ))
             ) : (

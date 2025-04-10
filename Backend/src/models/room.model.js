@@ -1,71 +1,77 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
-const roomSchema = new Schema({
-    title:{
-        type: String,
-        required: true,
-        trim: true,
+const roomSchema = new Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
     },
     slug: {
-        type: String,
-        required: true,
-        unique: true,
-        lowercase: true,
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
     },
     description: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     price: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
     },
     maxGuests: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
     },
     amenities: [
-        {
-            type: String
-        }
+      {
+        type: String,
+      },
     ],
-    images:[
-        {
-            type: String
-        }
+    images: [
+      {
+        type: String,
+      },
     ],
     available: {
-        type: Boolean,
-        default: true,
+      type: Boolean,
+      default: true,
     },
     location: {
-        type: {
-            type: String,
-            enum: ['Point'],
-            default: 'Point',
-            required: true
-        },
-        coordinates: {
-            type: [Number],
-            required: true,
-        }
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+        required: true,
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+      },
     },
     bookings: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: "Booking",
-        }
-    ]
-
-
-},{timestamps:true});
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Booking",
+      },
+    ],
+    reviews: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Review",
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
 // indexing for optimization
-roomSchema.index({location: "2dsphere"})
-roomSchema.index({price: 1})
+roomSchema.index({ location: "2dsphere" });
+roomSchema.index({ price: 1 });
 
-roomSchema.plugin(mongooseAggregatePaginate)
-
+roomSchema.plugin(mongooseAggregatePaginate);
 
 export const Room = mongoose.model("Room", roomSchema);

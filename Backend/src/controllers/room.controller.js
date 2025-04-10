@@ -136,7 +136,7 @@ const getRoomBySlug = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Slug is required");
   }
 
-  const room = await Room.findOne({ slug });
+  const room = await Room.findOne({ slug }).populate("reviews");
   if (!room) {
     throw new ApiError(404, "Room not available");
   }

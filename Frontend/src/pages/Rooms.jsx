@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import API from "../utils/axios";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const Rooms = () => {
+  const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState({
@@ -100,10 +102,12 @@ const Rooms = () => {
       {loading ? (
         <p className="text-center text-slate-300">Loading rooms...</p>
       ) : rooms.length > 0 ? (
-        <div className="grid gap-10 md:grid-cols-3 max-w-7xl mx-auto">
+        <div 
+        className="grid gap-10 md:grid-cols-3 cursor-pointer max-w-7xl mx-auto">
           {rooms.map((room, idx) => (
             <motion.div
               key={room._id}
+              onClick={() => navigate(`/rooms/${room.slug}`)}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: idx * 0.1 }}

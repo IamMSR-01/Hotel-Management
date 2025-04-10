@@ -17,13 +17,13 @@ router.post("/create", varifyJwt, createBooking);
 router.put(
   "/update/:bookingId",
   varifyJwt,
-  authorizeRoles("user", "admin"), // Only user who booked, admin
+  authorizeRoles("user", "admin"), 
   updateBooking
 );
 router.delete(
   "/cancel/:bookingId",
   varifyJwt,
-  authorizeRoles("user", "admin"), // Only user who booked, admin
+  authorizeRoles("user", "admin"), 
   deleteBooking
 );
 router.get("/user/:userId", varifyJwt, getUserBookings);

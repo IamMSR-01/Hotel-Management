@@ -15,6 +15,8 @@ import AdminRooms from "./pages/AdminRooms";
 import UpdateRoom from "./pages/UpdateRoom";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import RoomDetails from "./pages/RoomDetails";
+import Booking from "./pages/Booking";
 
 const App = () => {
   
@@ -34,7 +36,9 @@ const App = () => {
         <Route path="/rooms" element={<Rooms />} />
         <Route path="/admin/rooms" element={<AdminRooms />} />
         <Route path="/update-room/:slug" element={<UpdateRoom />} />
-        
+        <Route path="/rooms/:slug" element={<RoomDetails />} />
+        <Route path="/book-room" element={<Booking />} />
+
       </Routes>
     </>
   );

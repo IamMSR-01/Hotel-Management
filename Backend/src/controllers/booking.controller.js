@@ -41,19 +41,25 @@ const createBooking = asyncHandler(async (req, res) => {
       const totalPrice = nights * room.price;
 
       const [newBooking] = await Booking.create(
-        [{
-          roomId,
-          userId,
-          checkInDate,
-          checkOutDate,
-          totalPrice,
-          status: "Pending",
-          paymentStatus: "Pending",
-        }],
+        [
+          {
+            roomId,
+            userId,
+            checkInDate,
+            checkOutDate,
+            totalPrice,
+            status: "Pending",
+            paymentStatus: "Pending",
+          },
+        ],
         { session }
       );
 
-      res.status(201).json(new ApiResponse(201, { booking: newBooking }, "Booking successful"));
+      return res
+        .status(201)
+        .json(
+          new ApiResponse(201, { booking: newBooking }, "Booking successful")
+        );
     });
   } catch (error) {
     console.error("Booking Error:", error.message);
@@ -100,7 +106,9 @@ const updateBooking = asyncHandler(async (req, res) => {
     await booking.save({ session });
 
     await session.commitTransaction();
-    res.status(200).json(new ApiResponse(200, { booking }, "Booking updated successfully"));
+    res
+      .status(200)
+      .json(new ApiResponse(200, { booking }, "Booking updated successfully"));
   } catch (error) {
     await session.abortTransaction();
     throw new ApiError(500, "Internal server error | Booking update failed");
@@ -128,10 +136,17 @@ const deleteBooking = asyncHandler(async (req, res) => {
     await booking.save({ session });
 
     await session.commitTransaction();
-    res.status(200).json(new ApiResponse(200, { booking }, "Booking cancelled successfully"));
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, { booking }, "Booking cancelled successfully")
+      );
   } catch (error) {
     await session.abortTransaction();
-    throw new ApiError(500, "Internal server error | Booking cancellation failed");
+    throw new ApiError(
+      500,
+      "Internal server error | Booking cancellation failed"
+    );
   } finally {
     session.endSession();
   }
@@ -149,7 +164,9 @@ const getBookingById = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Booking not found");
   }
 
-  res.status(200).json(new ApiResponse(200, { booking }, "Booking fetched successfully"));
+  res
+    .status(200)
+    .json(new ApiResponse(200, { booking }, "Booking fetched successfully"));
 });
 
 // Get Bookings of a User
@@ -164,7 +181,11 @@ const getUserBookings = asyncHandler(async (req, res) => {
     throw new ApiError(404, "No bookings found for this user");
   }
 
-  res.status(200).json(new ApiResponse(200, { bookings }, "User bookings fetched successfully"));
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, { bookings }, "User bookings fetched successfully")
+    );
 });
 
 // Get All Bookings (Admin)
@@ -238,13 +259,18 @@ const getAllBookings = asyncHandler(async (req, res) => {
     limit: Number(limit),
   };
 
-  const bookings = await Booking.aggregatePaginate(Booking.aggregate(pipeline), options);
+  const bookings = await Booking.aggregatePaginate(
+    Booking.aggregate(pipeline),
+    options
+  );
 
   if (!bookings || bookings.docs.length === 0) {
     throw new ApiError(404, "No bookings found");
   }
 
-  res.status(200).json(new ApiResponse(200, bookings, "Bookings fetched successfully"));
+  res
+    .status(200)
+    .json(new ApiResponse(200, bookings, "Bookings fetched successfully"));
 });
 
 export {
