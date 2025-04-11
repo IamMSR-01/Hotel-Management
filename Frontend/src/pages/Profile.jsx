@@ -4,6 +4,7 @@ import { fetchMe } from "../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import API from "../utils/axios";
 import { toast } from "react-hot-toast";
+import {formatDate} from "../utils/formatDate.js";
 
 function Profile() {
   const dispatch = useDispatch();
@@ -160,10 +161,10 @@ function Profile() {
 
                         <div className="text-sm space-y-1 pt-2">
                           <p>
-                            <strong>Check-in:</strong> {booking?.checkInDate}
+                            <strong>Check-in:</strong> {formatDate(booking?.checkInDate)}
                           </p>
                           <p>
-                            <strong>Check-out:</strong> {booking?.checkOutDate}
+                            <strong>Check-out:</strong> {formatDate(booking?.checkOutDate)}
                           </p>
                           <p>
                             <strong>Guests:</strong> {booking?.guests}
