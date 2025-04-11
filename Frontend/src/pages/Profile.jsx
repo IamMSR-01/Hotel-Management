@@ -50,10 +50,10 @@ function Profile() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center"
+      className="min-h-screen flex items-center justify-center px-4 bg-cover bg-center bg-black pb-10"
       style={{
         backgroundImage:
-          "url('https://images.unsplash.com/photo-1527030280862-64139fba04ca?auto=format&fit=crop&w=1950&q=80')",
+          "url('https://images.pexels.com/photos/3251700/pexels-photo-3251700.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')",
       }}
     >
       <div className="w-full mt-14 max-w-6xl p-8 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md shadow-2xl text-white">
@@ -134,7 +134,7 @@ function Profile() {
               <div className="grid sm:grid-cols-2 gap-6">
                 {bookings.map((booking, index) => {
                   const room = booking?.roomDetails?.[0];
-
+              
                   return (
                     <div
                       key={index}
@@ -167,14 +167,17 @@ function Profile() {
                             <strong>Check-out:</strong> {formatDate(booking?.checkOutDate)}
                           </p>
                           <p>
-                            <strong>Guests:</strong> {booking?.guests}
+                            <strong>Guests:</strong> {room?.maxGuests}
+                          </p>
+                          <p>
+                            <strong>Duration:</strong> {booking?.duration} <span>Days</span>
                           </p>
                           <p>
                             <strong>Status:</strong> {booking?.status}
                           </p>
                           <p>
                             <strong>Payment:</strong>{" "}
-                            {booking?.paymentDetails?.[0]?.status}
+                            {booking.paymentStatus}
                           </p>
                         </div>
 
@@ -187,7 +190,7 @@ function Profile() {
                           </button>
                           <button
                             onClick={() =>
-                              navigate(`/bookings/update/${booking._id}`)
+                              navigate(`/update-booking/${booking._id}`)
                             }
                             className="px-3 py-1 bg-yellow-400 text-black rounded hover:bg-yellow-300"
                           >

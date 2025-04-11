@@ -28,8 +28,9 @@ router.delete(
 );
 router.get("/user/:userId", varifyJwt, getUserBookings);
 
+router.get("/:bookingId", varifyJwt, authorizeRoles("user","admin"), getBookingById);
+
 // 🔐 Admin Routes
 router.get("/all", varifyJwt, authorizeRoles("admin"), getAllBookings);
-router.get("/:bookingId", varifyJwt, authorizeRoles("admin"), getBookingById);
 
 export default router;

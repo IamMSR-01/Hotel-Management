@@ -20,6 +20,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import RoomDetails from "./pages/RoomDetails";
 import Booking from "./pages/Booking";
+import UpdateBooking from "./pages/UpdateBooking";
 
 const router = createBrowserRouter([
   {
@@ -81,7 +82,11 @@ const router = createBrowserRouter([
       {
         path: "/book-room",
         element: <Booking />,
-      }
+      },
+      {
+        path: "/update-booking/:bookingId",
+        element: <UpdateBooking />,
+      },
     ],
   },
 ]);

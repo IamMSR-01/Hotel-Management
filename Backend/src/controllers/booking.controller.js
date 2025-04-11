@@ -7,10 +7,17 @@ import mongoose from "mongoose";
 
 // Create Booking
 const createBooking = asyncHandler(async (req, res) => {
-  const { roomId, checkInDate, checkOutDate, guests } = req.body;
+  const { roomId, checkInDate, checkOutDate, guests, duration } = req.body;
   const userId = req.user?._id;
 
-  if (!roomId || !checkInDate || !checkOutDate || !guests || !userId) {
+  if (
+    !roomId ||
+    !checkInDate ||
+    !checkOutDate ||
+    !guests ||
+    !userId ||
+    !duration
+  ) {
     throw new ApiError(400, "All fields are required including user ID");
   }
 
@@ -39,6 +46,9 @@ const createBooking = asyncHandler(async (req, res) => {
         (new Date(checkOutDate) - new Date(checkInDate)) / (1000 * 60 * 60 * 24)
       );
       const totalPrice = nights * room.price;
+      const durationInDays = Math.ceil(
+        (new Date(checkOutDate) - new Date(checkInDate)) / (1000 * 60 * 60 * 24)
+      );
 
       const [newBooking] = await Booking.create(
         [
@@ -48,8 +58,10 @@ const createBooking = asyncHandler(async (req, res) => {
             checkInDate,
             checkOutDate,
             totalPrice,
+            duration: durationInDays,
             status: "Pending",
             paymentStatus: "Pending",
+            guests,
           },
         ],
         { session }
@@ -72,10 +84,14 @@ const createBooking = asyncHandler(async (req, res) => {
 // Update Booking
 const updateBooking = asyncHandler(async (req, res) => {
   const { bookingId } = req.params;
-  const { checkInDate, checkOutDate } = req.body;
+  const { checkInDate, checkOutDate, duration, maxGuests } = req.body;
 
-  if (!bookingId || !checkInDate || !checkOutDate) {
+  if (!checkInDate || !checkOutDate || !duration || !maxGuests) {
     throw new ApiError(400, "Missing required fields");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+    throw new ApiError(400, "Invalid booking ID");
   }
 
   if (new Date(checkInDate) >= new Date(checkOutDate)) {
@@ -103,6 +119,8 @@ const updateBooking = asyncHandler(async (req, res) => {
 
     booking.checkInDate = checkInDate;
     booking.checkOutDate = checkOutDate;
+    booking.duration = duration;
+    booking.maxGuests = maxGuests;
     await booking.save({ session });
 
     await session.commitTransaction();
@@ -111,14 +129,14 @@ const updateBooking = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, { booking }, "Booking updated successfully"));
   } catch (error) {
     await session.abortTransaction();
-    throw new ApiError(500, "Internal server error | Booking update failed");
+    console.error("Booking Update Error:", error);
+    throw new ApiError(500, error?.message || "Booking update failed");
   } finally {
     session.endSession();
   }
 });
 
 // Delete Booking (Soft delete)
-// controllers/bookingController.js
 const deleteBooking = asyncHandler(async (req, res) => {
   const { bookingId } = req.params;
   const session = await mongoose.startSession();
@@ -128,28 +146,46 @@ const deleteBooking = asyncHandler(async (req, res) => {
 
     if (!mongoose.Types.ObjectId.isValid(bookingId)) {
       await session.abortTransaction();
-      return res.status(400).json(new ApiResponse(400, null, "Invalid booking ID"));
+      return res
+        .status(400)
+        .json(new ApiResponse(400, null, "Invalid booking ID"));
     }
 
     const booking = await Booking.findById(bookingId).session(session);
     if (!booking) {
       await session.abortTransaction();
-      return res.status(404).json(new ApiResponse(404, null, "Booking not found"));
+      return res
+        .status(404)
+        .json(new ApiResponse(404, null, "Booking not found"));
     }
 
     if (booking.status === "Cancelled") {
       await session.abortTransaction();
-      return res.status(400).json(new ApiResponse(400, null, "Booking is already cancelled"));
+      return res
+        .status(400)
+        .json(new ApiResponse(400, null, "Booking is already cancelled"));
     }
 
     booking.status = "Cancelled";
     await booking.save({ session });
 
     await session.commitTransaction();
-    return res.status(200).json(new ApiResponse(200, { booking }, "Booking cancelled successfully"));
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, { booking }, "Booking cancelled successfully")
+      );
   } catch (error) {
     await session.abortTransaction();
-    return res.status(500).json(new ApiResponse(500, null, error?.message || "Booking cancellation failed"));
+    return res
+      .status(500)
+      .json(
+        new ApiResponse(
+          500,
+          null,
+          error?.message || "Booking cancellation failed"
+        )
+      );
   } finally {
     session.endSession();
   }

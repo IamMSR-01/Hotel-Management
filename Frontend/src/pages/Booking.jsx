@@ -12,6 +12,7 @@ function Booking() {
     checkInDate: "",
     checkOutDate: "",
     guests: 1,
+    duration: 1,
   });
 
   const handleChange = (e) => {
@@ -81,6 +82,20 @@ function Booking() {
               name="guests"
               min="1"
               value={formData.guests}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 bg-white/20 text-white border border-white/30 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400"
+            />
+          </div>
+          <div>
+            <label className="block mb-1 text-sm font-medium text-white/90">
+              Duration
+            </label>
+            <input
+              type="number"
+              name="duration"
+              min="1"
+              value={formData.duration}
               onChange={handleChange}
               required
               className="w-full px-4 py-2 bg-white/20 text-white border border-white/30 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400"

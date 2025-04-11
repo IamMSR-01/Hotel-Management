@@ -40,7 +40,11 @@ const bookingSchema = new Schema({
         type: String,
         enum: ['Pending', 'Failed', 'Paid'],
         default: 'Pending'
-    }
+    },
+    duration: {
+        type: Number,
+        required: true,
+    },
 
 
 }, {timestamps: true});
