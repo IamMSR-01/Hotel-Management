@@ -3,8 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import API from "../utils/axios";
 import { motion } from "framer-motion";
 
-function RoomDetails() {
-  const navigate = useNavigate();
+function BookingSummary() {
   const { slug } = useParams();
   const [room, setRoom] = useState({});
   const [loading, setLoading] = useState(true);
@@ -13,8 +12,6 @@ function RoomDetails() {
     try {
       const { data } = await API.get(`/rooms/${slug}`);
       console.log("data", data)
-      const images = data?.message?.room?.images
-      console.log(images)
       setRoom(data?.message?.room);
     } catch (error) {
       console.error("Error fetching room details:", error);
@@ -36,7 +33,7 @@ function RoomDetails() {
     );
 
   return (
-    <section className="min-h-screen py-20 px-6 bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-black text-white">
+    <section className="min-h-screen py-20 px-6 bg-white/10 text-white">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -77,16 +74,6 @@ function RoomDetails() {
             </p>
           </div>
 
-          <div className="flex items-center justify-center">
-            <motion.button
-              onClick={() => navigate("/book-room", { state: { roomId: room._id } })}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-gradient-to-r from-pink-500 to-indigo-500 hover:from-pink-600 hover:to-indigo-600 transition-all px-8 py-3 rounded-xl shadow-lg text-white font-semibold"
-            >
-              Book Now
-            </motion.button>
-          </div>
         </div>
 
         {/* Reviews Section */}
@@ -118,4 +105,4 @@ function RoomDetails() {
   );
 }
 
-export default RoomDetails;
+export default BookingSummary;
