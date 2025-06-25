@@ -1,58 +1,104 @@
-import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedin } from "react-icons/fa";
+import React from "react";
+import { assets } from "../assets/assets";
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-tr from-black via-gray-900 to-black text-gray-300 py-14">
-      <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-10 text-sm">
-        {/* Company Info */}
-        <div>
-          <h3 className="text-white font-bold text-lg mb-4">StayEase</h3>
-          <p className="mb-4">
-            Redefining comfort with luxury. Stay at the most premium spaces, crafted for peace and ease.
+    <div className="text-gray-500 bg-gray-950 pt-8 px-6 md:px-16 lg:px-24 xl:px-32">
+      <div className="flex flex-wrap justify-between gap-12 md:gap-6">
+        <div className="max-w-80">
+          <img src={assets.logo} alt="logo" className="mb-4 h-8 md:h-9" />
+          <p className="text-sm">
+            Discover the world's most extraordinary places to stay from boutique
+            hotels to luxury villas and private islands.
           </p>
-          <div className="flex gap-4 text-xl text-gray-400 mt-4">
-            <FaFacebookF className="hover:text-blue-500 cursor-pointer" />
-            <FaInstagram className="hover:text-pink-500 cursor-pointer" />
-            <FaTwitter className="hover:text-blue-400 cursor-pointer" />
-            <FaLinkedin className="hover:text-blue-600 cursor-pointer" />
+          <div className="flex items-center gap-3 mt-4">
+            {/* Instagram */}
+            <img src={assets.instagramIcon} alt="Instagram" />
+            {/* Facebook */}
+            <img src={assets.facebookIcon} alt="Facebook" />
+            {/* Twitter */}
+            <img src={assets.twitterIcon} alt="Twitter" />
+            {/* LinkedIn */}
+            <img src={assets.linkendinIcon} alt="LinkedIn" />
           </div>
         </div>
 
-        {/* Quick Links */}
         <div>
-          <h4 className="text-white font-semibold mb-4">Quick Links</h4>
-          <ul className="space-y-3">
-            <li><a href="#" className="hover:text-yellow-400">Home</a></li>
-            <li><a href="#" className="hover:text-yellow-400">Rooms</a></li>
-            <li><a href="#" className="hover:text-yellow-400">Features</a></li>
-            <li><a href="#" className="hover:text-yellow-400">Offers</a></li>
+          <p className="text-lg text-gray-400">COMPANY</p>
+          <ul className="mt-3 flex flex-col gap-2 text-sm">
+            <li>
+              <a href="#">About</a>
+            </li>
+            <li>
+              <a href="#">Careers</a>
+            </li>
+            <li>
+              <a href="#">Press</a>
+            </li>
+            <li>
+              <a href="#">Blog</a>
+            </li>
+            <li>
+              <a href="#">Partners</a>
+            </li>
           </ul>
         </div>
 
-        {/* Support */}
         <div>
-          <h4 className="text-white font-semibold mb-4">Support</h4>
-          <ul className="space-y-3">
-            <li><a href="#" className="hover:text-yellow-400">Contact Us</a></li>
-            <li><a href="#" className="hover:text-yellow-400">Help Center</a></li>
-            <li><a href="#" className="hover:text-yellow-400">Cancellation Policy</a></li>
-            <li><a href="#" className="hover:text-yellow-400">FAQs</a></li>
+          <p className="text-lg text-gray-400">SUPPORT</p>
+          <ul className="mt-3 flex flex-col gap-2 text-sm">
+            <li>
+              <a href="#">Help Center</a>
+            </li>
+            <li>
+              <a href="#">Safety Information</a>
+            </li>
+            <li>
+              <a href="#">Cancellation Options</a>
+            </li>
+            <li>
+              <a href="#">Contact Us</a>
+            </li>
+            <li>
+              <a href="#">Accessibility</a>
+            </li>
           </ul>
         </div>
 
-        {/* Contact Info */}
-        <div>
-          <h4 className="text-white font-semibold mb-4">Contact</h4>
-          <p className="mb-2">📍 Dehradun, Uttarakhand, India</p>
-          <p className="mb-2">📞 +91 90XXXXXXXX</p>
-          <p className="mb-2">✉️ support@stayease.com</p>
+        <div className="max-w-80">
+          <p className="text-lg text-gray-400">STAY UPDATED</p>
+          <p className="mt-3 text-sm">
+            Subscribe to our newsletter for inspiration and special offers.
+          </p>
+          <div className="flex items-center mt-4">
+            <input
+              type="text"
+              className="bg-white rounded-l border border-gray-300 h-9 px-3 outline-none"
+              placeholder="Your email"
+            />
+            <button className="flex items-center justify-center bg-gray-700 h-9 w-9 aspect-square rounded-r">
+              {/* Arrow icon */}
+              <img src={assets.arrowIcon} alt="arrow-icon" className="w-3.5 invert" />
+            </button>
+          </div>
         </div>
       </div>
-
-      <div className="mt-10 text-center text-gray-500 text-xs">
-        &copy; {new Date().getFullYear()} StayEase. All rights reserved.
+      <hr className="border-gray-300 mt-8" />
+      <div className="flex flex-col md:flex-row gap-2 items-center justify-between py-5">
+        <p>© {new Date().getFullYear()} QuickStay. All rights reserved.</p>
+        <ul className="flex items-center gap-4">
+          <li>
+            <a href="#">Privacy</a>
+          </li>
+          <li>
+            <a href="#">Terms</a>
+          </li>
+          <li>
+            <a href="#">Sitemap</a>
+          </li>
+        </ul>
       </div>
-    </footer>
+    </div>
   );
 };
 

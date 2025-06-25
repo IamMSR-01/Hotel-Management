@@ -12,9 +12,9 @@ function RoomDetails() {
   const fetchRoom = async () => {
     try {
       const { data } = await API.get(`/rooms/${slug}`);
-      console.log("data", data)
-      const images = data?.message?.room?.images
-      console.log(images)
+      console.log("data", data);
+      const images = data?.message?.room?.images;
+      console.log(images);
       setRoom(data?.message?.room);
     } catch (error) {
       console.error("Error fetching room details:", error);
@@ -79,7 +79,7 @@ function RoomDetails() {
 
           <div className="flex items-center justify-center">
             <motion.button
-              onClick={() => navigate("/book-room", { state: { roomId: room._id } })}
+              onClick={() => navigate("/book-room", { state: { room } })}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="bg-gradient-to-r from-pink-500 to-indigo-500 hover:from-pink-600 hover:to-indigo-600 transition-all px-8 py-3 rounded-xl shadow-lg text-white font-semibold"

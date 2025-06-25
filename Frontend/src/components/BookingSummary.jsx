@@ -1,36 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import API from "../utils/axios";
 import { motion } from "framer-motion";
 
-function BookingSummary() {
-  const { slug } = useParams();
-  const [room, setRoom] = useState({});
+function BookingSummary({ room }) {
   const [loading, setLoading] = useState(true);
 
-  const fetchRoom = async () => {
-    try {
-      const { data } = await API.get(`/rooms/${slug}`);
-      console.log("data", data)
-      setRoom(data?.message?.room);
-    } catch (error) {
-      console.error("Error fetching room details:", error);
-    } finally {
+  useEffect(() => {
+    if (room) {
       setLoading(false);
     }
-  };
+  }, [room]);
 
-  useEffect(() => {
-    fetchRoom();
-  }, [slug]);
-
-  if (loading)
+  if (loading) {
     return <div className="text-center text-slate-300 py-20">Loading...</div>;
+  }
 
-  if (!room)
-    return (
-      <div className="text-center text-red-400 py-20">Room not found.</div>
-    );
+  if (!room) {
+    return <div className="text-center text-red-400 py-20">Room not found.</div>;
+  }
 
   return (
     <section className="min-h-screen py-20 px-6 bg-white/10 text-white">
@@ -73,7 +59,6 @@ function BookingSummary() {
               </span>
             </p>
           </div>
-
         </div>
 
         {/* Reviews Section */}
