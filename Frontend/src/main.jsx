@@ -8,6 +8,7 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App";
 import Home from "./pages/Home";
+import AllRooms from "./pages/AllRooms";
 // import Login from "./pages/Login";
 // import Register from "./pages/Register";
 // import Profile from "./pages/Profile";
@@ -71,10 +72,10 @@ const router = createBrowserRouter([
       //   path: "/add-room",
       //   element: <AddRoom />,
       // },
-      // {
-      //   path: "/rooms",
-      //   element: <Rooms />,
-      // },
+      {
+        path: "/rooms",
+        element: <AllRooms />,
+      },
       // {
       //   path: "/admin/rooms",
       //   element: <AdminRooms />,
