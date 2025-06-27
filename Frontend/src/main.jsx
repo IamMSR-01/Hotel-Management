@@ -20,7 +20,7 @@ import AllRooms from "./pages/AllRooms";
 // import UpdateRoom from "./pages/UpdateRoom";
 // import About from "./pages/About";
 // import Contact from "./pages/Contact";
-// import RoomDetails from "./pages/RoomDetails";
+import RoomDetails from "./pages/RoomDetails";
 // import Booking from "./pages/Booking";
 // import UpdateBooking from "./pages/UpdateBooking";
 
@@ -84,10 +84,10 @@ const router = createBrowserRouter([
       //   path: "/update-room/:slug",
       //   element: <UpdateRoom />,
       // },
-      // {
-      //   path: "/rooms/:slug",
-      //   element: <RoomDetails />,
-      // },
+      {
+        path: "/rooms/:id",
+        element: <RoomDetails />,
+      },
       // {
       //   path: "/book-room",
       //   element: <Booking />,
