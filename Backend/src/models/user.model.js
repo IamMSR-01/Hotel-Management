@@ -4,52 +4,34 @@ import bcrypt from "bcrypt";
 
 const userSchema = new Schema(
   {
-    username: {
+    _id: {
       type: String,
-      required: true,
-      lowercase: true,
-      unique: true,
-      index: true,
+      required: true
     },
-    fullName: {
-      type: String,
-      required: true,
+    username: {
+      type: String, 
+      required: true
     },
     email: {
       type: String,
-      required: true,
-      lowercase: true,
-      unique: true,
+      require: true
     },
-    password: {
+    image:{
       type: String,
-      required: true,
-      minlength: 8,
+      required: true
     },
-    phoneNumber: {
-      type: Number,
-      required: true,
-      // unique: true,
-    },
-    role: {
+    role:{
       type: String,
-      required: true,
-      enum: ["user", "admin"],
+      enum: ["user", "hotelOwner"],
       default: "user",
     },
-    avatar: {
-      type: String,
-      //   default: ""
-    },
-    refreshToken: {
-      type: String,
-    },
-    bookings: [
+    recentSearchedCities: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Booking",
-      },
-    ],
+        type: String,
+        required: true,
+      }
+    ]
+     
   },
   { timestamps: true }
 );

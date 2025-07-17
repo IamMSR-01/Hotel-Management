@@ -1,9 +1,14 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { clerkMiddleware } from '@clerk/express'
 
 // app using express
 const app = express();
+
+
+// clerk Middleware setup
+app.use(clerkMiddleware);
 
 // cors setup
 app.use(
@@ -20,16 +25,10 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 // import routes
-import userRoutes from "./routes/user.routes.js";
-import roomRoutes from "./routes/room.routes.js";
-import bookingRoutes from "./routes/booking.routes.js";
-import reviewRoutes from "./routes/review.routes.js"
+import clerkWebhooks from "./controllers/clerkWebhooks.js";
 
 // declared routes
-app.use("/api/v1/users", userRoutes);
-app.use("/api/v1/rooms", roomRoutes);
-app.use("/api/v1/bookings", bookingRoutes);
-app.use("/api/v1/reviews", reviewRoutes)
+app.use("/api/clerk", clerkWebhooks);
 
 
 export { app };
