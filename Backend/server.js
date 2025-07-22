@@ -4,6 +4,8 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import { clerkMiddleware } from "@clerk/express";
 import clerkWebhooks from "./controllers/clerkWebhooks.js"
+import userRouter from "./routes/user.routes.js";
+import hotelRouter from "./routes/hotel.routes.js";
 
 const app = express();
 
@@ -16,6 +18,8 @@ app.use(clerkMiddleware());
 app.use("/api/clerk", clerkWebhooks)
 
 app.get("/", (req, res) => res.send("API is working well and good"));
+app.use("/api/user", userRouter)
+app.use("/api/hotels", hotelRouter)
 
 const PORT = process.env.PORT || 3000;
 
