@@ -12,15 +12,18 @@ import Layout from "./pages/hotelOwner/Layout";
 import AddRoom from "./pages/hotelOwner/AddRoom";
 import ListRoom from "./pages/hotelOwner/ListRoom";
 import Dashboard from "./pages/hotelOwner/Dashboard";
+import { useAppContext } from "./context/AppContext.jsx";
 
 const App = () => {
   const isOwnerPath = useLocation().pathname.includes("owner");
+
+  const { showHotelReg } = useAppContext();
 
   return (
     <>
       <Toaster position="top-right" reverseOrder={false} />
       {!isOwnerPath && <Navbar />}
-      {false && <HotelReg />}
+      {showHotelReg && <HotelReg />}
       <div className="min-h-[70vh]">
         <Routes>
           <Route path="/" element={<Home />} />
