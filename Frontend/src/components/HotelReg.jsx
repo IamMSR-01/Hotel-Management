@@ -12,24 +12,33 @@ const HotelReg = () => {
   const [city, setCity] = useState("");
 
   const onSubmitHandler = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     try {
-      const { data } = await axios.post("/api/hotels/", {name, contact, address, city}, {headers: { Authorization: `Bearer ${await getToken()}` }});
+      const { data } = await axios.post(
+        "/api/hotels",
+        { name, contact, address, city },
+        { headers: { Authorization: `Bearer ${await getToken()}` } }
+      );
 
-      if (data.success) {
-        toast.success("Hotel registered successfully!");
-        setIsOwner(true);
-        setShowHotelReg(false);
-      }else{
-        toast.error(data.message || "Failed to register hotel. Please try again.");
-      }
+      console.log("Hotel registration response:", data);
+
+      toast.success(data.message || "Hotel registered successfully!");
+      setIsOwner(true);
+      setShowHotelReg(false);
     } catch (error) {
-      toast.error("An error occurred while registering the hotel.");
+      const message =
+        error.response?.data?.message ||
+        "An error occurred while registering the hotel.";
+      console.error("Hotel registration error:", message);
+      toast.error(message);
     }
   };
 
   return (
-    <div onClick={() => setShowHotelReg(false)} className="fixed top-0 bottom-0 left-0 right-0 z-100 flex items-center justify-center bg-black/70">
+    <div
+      onClick={() => setShowHotelReg(false)}
+      className="fixed top-0 bottom-0 left-0 right-0 z-100 flex items-center justify-center bg-black/70"
+    >
       <form
         onSubmit={onSubmitHandler}
         onClick={(e) => e.stopPropagation()}

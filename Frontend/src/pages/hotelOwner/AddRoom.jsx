@@ -5,7 +5,6 @@ import { useAppContext } from "../../context/AppContext.jsx";
 import toast from "react-hot-toast";
 
 const AddRoom = () => {
-
   const { axios, getToken } = useAppContext();
 
   const [images, setImages] = useState({
@@ -27,11 +26,18 @@ const AddRoom = () => {
     },
   });
 
-  const [ loading, setLoading ] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if(!input.roomType || !input.pricePerNight || !input.amenities || !Object.values(images).some(image => image)) {
+    
+    const hasAmenity = Object.values(input.amenities).some((value) => value);
+    if (
+      !input.roomType ||
+      !input.pricePerNight ||
+      !hasAmenity ||
+      !Object.values(images).some((image) => image)
+    ) {
       toast.error("Please fill all fields and upload at least one image.");
       return;
     }
@@ -50,14 +56,16 @@ const AddRoom = () => {
       Object.keys(images).forEach((key) => {
         if (images[key]) {
           formData.append("images", images[key]);
-        } 
+        }
       });
 
       const response = await axios.post("/api/rooms", formData, {
         headers: {
-          Authorization: `Bearer ${getToken()}`,
+          Authorization: `Bearer ${await getToken()}`,
         },
       });
+
+      console.log("Add Room response:", response.data);
 
       if (response.success) {
         toast.success("Room added successfully!");
@@ -78,15 +86,17 @@ const AddRoom = () => {
           3: null,
           4: null,
         });
-      }else{
-        toast.error(response.message || "Failed to add room. Please try again.");
+      } else {
+        toast.error(
+          response.message || "Failed to add room. Please try again."
+        );
       }
     } catch (error) {
       toast.error("Failed to add room.");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit}>
