@@ -5,7 +5,7 @@ const clerkWebhooks = async (req, res) => {
   try {
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
-    console.log("Is MONGO_URI set on Vercel?", !!process.env.MONGO_URI);
+    console.log("Is MONGO_URI set on Vercel?", !!process.env.MONGODB_URI);
     console.log(
       "Is CLERK_WEBHOOK_SECRET set on Vercel?",
       !!process.env.CLERK_WEBHOOK_SECRET
