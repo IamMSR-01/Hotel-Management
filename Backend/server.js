@@ -13,19 +13,13 @@ import bookingRouter from "./routes/booking.routes.js";
 connectCloudinary();
 const app = express();
 
+console.log("--- ✅ SERVER IS STARTING WITH LATEST CODE ---");
+
 app.use(cors());
-
-// --- FIX: Handle webhooks BEFORE parsing all other JSON bodies ---
-app.use("/api/clerk", express.raw({ type: "application/json" }), clerkWebhooks);
-
-// Now, use express.json() for all other routes
 app.use(express.json());
 
-// All other middleware and routes follow
-app.use(clerkMiddleware({
-  secretKey: process.env.CLERK_SECRET_KEY,
-  publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
-}));
+app.use(clerkMiddleware());
+app.use("/api/clerk", clerkWebhooks);
 
 
 

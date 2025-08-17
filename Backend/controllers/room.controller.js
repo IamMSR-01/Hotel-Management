@@ -6,9 +6,14 @@ export const createRoom = async (req, res) => {
   try {
     const { roomType, pricePerNight, amenities } = req.body;
 
+    console.log("BODY:", req.body);
+    console.log("FILES:", req.files);
+
     const hotel = await Hotel.findOne({ owner: req.user._id });
     if (!hotel) {
-      return res.status(404).json({ success: false, message: "Hotel not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Hotel not found" });
     }
 
     const uploadImages = req.files.map(async (file) => {
@@ -16,6 +21,8 @@ export const createRoom = async (req, res) => {
       return response.secure_url;
     });
     const images = await Promise.all(uploadImages);
+
+    console.log("Uploaded images:", images);
 
     await Room.create({
       hotel: hotel._id,
@@ -25,13 +32,19 @@ export const createRoom = async (req, res) => {
       images,
     });
 
-    res.status(201).json({ success: true, message: "Room created successfully" });
+    res
+      .status(201)
+      .json({ success: true, message: "Room created successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: error.message || "Internal server error" });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: error.message || "Internal server error",
+      });
   }
 };
-
 
 export const getRooms = async (req, res) => {
   try {

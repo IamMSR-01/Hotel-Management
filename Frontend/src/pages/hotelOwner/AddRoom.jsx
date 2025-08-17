@@ -30,7 +30,7 @@ const AddRoom = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const hasAmenity = Object.values(input.amenities).some((value) => value);
     if (
       !input.roomType ||
@@ -46,10 +46,10 @@ const AddRoom = () => {
       const formData = new FormData();
 
       formData.append("roomType", input.roomType);
-      formData.append("pricePerNight", input.pricePerNight);
+      formData.append("pricePerNight", Number(input.pricePerNight));
 
       const amenities = Object.keys(input.amenities).filter(
-        (amenity) => input.amenities[amenity]
+        (key) => input.amenities[key]
       );
       formData.append("amenities", JSON.stringify(amenities));
 
@@ -59,15 +59,21 @@ const AddRoom = () => {
         }
       });
 
-      const response = await axios.post("/api/rooms", formData, {
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+
+      console.log("Form data prepared:", formData);
+      const { data } = await axios.post("/api/rooms", formData, {
         headers: {
           Authorization: `Bearer ${await getToken()}`,
+          "Content-Type": "multipart/form-data",
         },
       });
 
-      console.log("Add Room response:", response.data);
+      console.log("Add Room response:", data);
 
-      if (response.success) {
+      if (data.success) {
         toast.success("Room added successfully!");
         setInput({
           roomType: "",
@@ -87,9 +93,7 @@ const AddRoom = () => {
           4: null,
         });
       } else {
-        toast.error(
-          response.message || "Failed to add room. Please try again."
-        );
+        toast.error(data.message || "Failed to add room. Please try again.");
       }
     } catch (error) {
       toast.error("Failed to add room.");

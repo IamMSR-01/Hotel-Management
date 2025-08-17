@@ -12,7 +12,7 @@ import { useUser, useAuth } from "@clerk/clerk-react";
 import { toast } from "react-hot-toast";
 
 axios.defaults.baseURL =
-  import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
+  import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 const AppContext = createContext();
 
@@ -30,10 +30,14 @@ export const AppProvider = ({ children }) => {
       const token = await getToken();
       if (!token) return;
 
+      console.log("Fetching user", user);
+      console.log("Token:", getToken);
+
       const { data } = await axios.get("/api/user", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      console.log("User data fetched:", data);
 
       if (data.success) {
         setIsOwner(data.role === "hotelOwner");
@@ -45,7 +49,7 @@ export const AppProvider = ({ children }) => {
       console.log(error);
       toast.error("Failed to fetch user data. Please try again later.");
     }
-  }, [getToken]); 
+  }, [user, getToken]); 
 
   useEffect(() => {
     if (user) {
