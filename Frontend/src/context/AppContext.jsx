@@ -17,13 +17,32 @@ axios.defaults.baseURL =
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
+  const currency = import.meta.env.VITE_CURRENCY || "$";
+
   const navigate = useNavigate();
   const { user } = useUser();
   const { getToken } = useAuth();
   const [isOwner, setIsOwner] = useState(false);
   const [showHotelReg, setShowHotelReg] = useState(false);
   const [searchedCities, setSearchedCities] = useState([]);
-  const currency = import.meta.env.VITE_CURRENCY || "$";
+  const [rooms, setRooms] = useState([]);
+
+
+  const fetchRooms = async () => {
+    try {
+      const { data } = await axios.get("/api/rooms");
+      if (data.success) {
+        setRooms(data.rooms);
+      } else {
+        toast.error("Failed to fetch rooms. Please try again later.");
+        console.error("Failed to fetch rooms:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching rooms:", error);
+      toast.error("Error fetching rooms. Please try again later.");
+    }
+  }
+
 
   const fetchUser = useCallback(async () => {
     try {
@@ -57,6 +76,10 @@ export const AppProvider = ({ children }) => {
     }
   }, [user, fetchUser]); 
 
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
   const value = useMemo(
     () => ({
       currency,
@@ -70,6 +93,8 @@ export const AppProvider = ({ children }) => {
       setShowHotelReg,
       searchedCities,
       setSearchedCities,
+      rooms,
+      setRooms
     }),
     [user, isOwner, showHotelReg, searchedCities, getToken, navigate]
   );
