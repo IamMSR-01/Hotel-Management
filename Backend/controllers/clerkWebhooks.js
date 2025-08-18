@@ -28,7 +28,6 @@ const clerkWebhooks = async (req, res) => {
       return res.status(400).json({ success: false, message: "No data in webhook payload" });
     }
 
-    // Safely extract email with fallbacks
     const email =
       Array.isArray(data.email_addresses) && data.email_addresses.length
         ? data.email_addresses[0]?.email_address
@@ -52,12 +51,12 @@ const clerkWebhooks = async (req, res) => {
         break;
       }
       case "user.updated": {
-        await User.findByIdAndUpdate(data.id, userData, { new: true, upsert: false });
+        await User.findByIdAndUpdate({ clerkId: data.id }, userData, { new: true, upsert: false });
         console.log("User updated:", userData);
         break;
       }
       case "user.deleted": {
-        await User.findByIdAndDelete(data.id);
+        await User.findByIdAndDelete({ clerkId: data.id });
         console.log("User deleted:", userData);
         break;
       }
