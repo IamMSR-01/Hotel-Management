@@ -37,7 +37,7 @@ const clerkWebhooks = async (req, res) => {
           null;
 
     const userData = {
-      _id: data.id,
+      clerkId: data.id,
       email: email,
       username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
       image: data.image_url || null,
