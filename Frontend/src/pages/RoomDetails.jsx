@@ -1,20 +1,90 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { assets, facilityIcons, roomCommonData, roomsDummyData } from "../assets/assets";
+import { assets, facilityIcons, roomCommonData } from "../assets/assets";
 import StarRating from "../components/StarRating";
+import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 
 function RoomDetails() {
   const { id } = useParams();
+  const { rooms, getToken, axios, navigate } = useAppContext();
   const [room, setRoom] = useState(null);
   const [mainImage, setMainImage] = useState(null);
+  const [checkInDate, setCheckInDate] = useState(null);
+  const [checkOutDate, setCheckOutDate] = useState(null);
+  const [guests, setGuests] = useState(1);
+  const [isAvailable, setIsAvailable] = useState(false);
+
+  const checkAvailability = async (e) => {
+    try {
+      if (checkInDate >= checkOutDate) {
+        toast.error("Invalid date selection");
+        return;
+      }
+
+      const { data } = await axios.post("/api/bookings/check-availability", {
+        room: id,
+        checkInDate,
+        checkOutDate,
+      });
+
+      if (data.success) {
+        if (data.isAvailable) {
+          setIsAvailable(true);
+          toast.success("Room is available");
+        } else {
+          setIsAvailable(false);
+          toast.error("Room is not available");
+        }
+      } else {
+        toast.error(data.message || "Something went wrong");
+      }
+    } catch (error) {
+      toast.error(error.message || "Something went wrong");
+    }
+  };
+
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    try {
+      if (!isAvailable) {
+        return checkAvailability();
+      } else {
+        const { data } = await axios.post(
+          "/api/bookings/book",
+          {
+            room: id,
+            checkInDate,
+            checkOutDate,
+            guests,
+            paymentMethod: "Pay At Hotel",
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
+        );
+        if (data.success) {
+          toast.success("Booking successful");
+          navigate("/my-bookings");
+          scrollTo(0, 0);
+        } else {
+          toast.error(data.message || "Something went wrong");
+        }
+      }
+    } catch (error) {
+      toast.error(error.message || "Something went wrong");
+    }
+  };
 
   useEffect(() => {
-    const room = roomsDummyData.find((room) => room._id === id);
+    const room = rooms.find((room) => room._id === id);
     if (room) {
       setRoom(room);
       setMainImage(room.images[0]);
     }
-  }, [id]);
+  }, [rooms]);
   return (
     room && (
       <div className="min-h-screen py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32">
@@ -89,6 +159,7 @@ function RoomDetails() {
         </div>
         {/* check availability */}
         <form
+          onSubmit={onSubmitHandler}
           className="flex flex-col md:flex-row item-start md:items-center justify-between bg-white shadow-2xl p-6 rounded-xl mx-auto mt-16 max-w-6xl"
           action=""
         >
@@ -98,6 +169,8 @@ function RoomDetails() {
                 Check-in
               </label>
               <input
+                onChange={(e) => setCheckInDate(e.target.value)}
+                min={new Date().toISOString().split("T")[0]}
                 type="date"
                 id="checkInDate"
                 className="border border-gray-300 p-2 rounded-lg mt-1.5 w-full"
@@ -111,6 +184,9 @@ function RoomDetails() {
                 Check-out
               </label>
               <input
+                onChange={(e) => setCheckOutDate(e.target.value)}
+                min={checkInDate}
+                disabled={!checkInDate}
                 type="date"
                 id="checkOutDate"
                 className="border border-gray-300 p-2 rounded-lg mt-1.5 w-full"
@@ -124,11 +200,12 @@ function RoomDetails() {
                 Guests
               </label>
               <input
+                onChange={(e) => setGuests(e.target.value)}
                 type="number"
                 id="guests"
                 min="1"
                 className="border border-gray-300 p-2 rounded-lg mt-1.5 w-full"
-                placeholder="Guests"
+                placeholder="1"
                 required
               />
             </div>
@@ -137,16 +214,13 @@ function RoomDetails() {
             className="bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition duration-300 cursor-pointer"
             type="submit"
           >
-            Check Availability
+            {isAvailable ? "Book Now" : "Check Availability"}
           </button>
         </form>
         {/* common specifications */}
         <div className="mt-25 space-y-4">
           {roomCommonData.map((spec, index) => (
-            <div
-              key={index}
-              className="flex items-start gap-2"
-            >
+            <div key={index} className="flex items-start gap-2">
               <img
                 src={spec.icon}
                 alt={`${spec.title}-icon`}
@@ -162,13 +236,22 @@ function RoomDetails() {
         {/* room description */}
         <div className="max-w-3xl border-y border-gray-300 my-15 py-10 text-gray-500">
           <p>
-            Guests can enjoy a range of amenities, including a fully equipped kitchen, a spacious living area, and a private balcony with stunning views. The room is designed to provide a comfortable and relaxing atmosphere, making it the perfect choice for both short and long stays. Whether you're traveling for business or leisure, this room offers everything you need for a memorable stay.
+            Guests can enjoy a range of amenities, including a fully equipped
+            kitchen, a spacious living area, and a private balcony with stunning
+            views. The room is designed to provide a comfortable and relaxing
+            atmosphere, making it the perfect choice for both short and long
+            stays. Whether you're traveling for business or leisure, this room
+            offers everything you need for a memorable stay.
           </p>
         </div>
         {/* hotel owner information */}
         <div className="flex flex-col item-start gap-4">
           <div className="flex gap-4">
-            <img src={room.hotel.owner.image} alt="Host" className="w-14 h-14 md:w-18 md:h-18 rounded-full" />
+            <img
+              src={room.hotel.owner.image}
+              alt="Host"
+              className="w-14 h-14 md:w-18 md:h-18 rounded-full"
+            />
             <div>
               <p className="text-lg md:text-xl">Hosted by {room.hotel.name}</p>
               <div className="flex items-center gap-2 mt-1">
@@ -177,7 +260,9 @@ function RoomDetails() {
               </div>
             </div>
           </div>
-          <button className="px-6 py-2.5 mt-4 rounded text-white bg-blue-500 hover:bg-blue-600 w-40 transition-all cursor-pointer">Contact Now</button>
+          <button className="px-6 py-2.5 mt-4 rounded text-white bg-blue-500 hover:bg-blue-600 w-40 transition-all cursor-pointer">
+            Contact Now
+          </button>
         </div>
       </div>
     )

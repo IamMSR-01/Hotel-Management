@@ -133,7 +133,7 @@ function AllRooms() {
             enhance your stay and create unforgettable memories.
           </p>
         </div>
-        {roomsDummyData.map((room) => (
+        {filteredRooms.map((room) => (
           <div
             key={room._id}
             className="flex flex-col md:flex-row items-start py-10 gap-6 border-b border-gray-300 last:border-b-0 last:pb-30"
@@ -214,7 +214,8 @@ function AllRooms() {
               <CheckBox
                 key={index}
                 label={room}
-                onChange={(checked, label) => console.log(`${label} is ${checked ? "selected" : "deselected"}`)}
+                selected={selectedFilters.roomType.includes(room)}
+                onChange={(checked) => handleFilterChange("roomType", room, checked)}
               />
             ))}
           </div>
@@ -223,8 +224,9 @@ function AllRooms() {
             {priceRanges.map((range, index) => (
               <CheckBox
                 key={index}
-                label={`$ ${range}`}
-                onChange={(checked, label) => console.log(`${label} is ${checked ? "selected" : "deselected"}`)}
+                label={`${currency} ${range}`}
+                selected={selectedFilters.priceRange.includes(range)}
+                onChange={(checked) => handleFilterChange("priceRange", range, checked)}
               />
             ))}
           </div>
@@ -234,7 +236,8 @@ function AllRooms() {
               <RadioButton
                 key={index}
                 label={option}
-                onChange={(label) => console.log(`${label} is selected`)}
+                selected={selectedSort === option}
+                onChange={() => handleSortChange(option)}
               />
             ))}
           </div>
