@@ -1,6 +1,7 @@
 import Booking from "../models/booking.model.js";
 import Room from "../models/room.model.js";
 import Hotel from "../models/hotel.model.js";
+import transporter from "../config/NodeMailer.js";
 
 // function to check the availability of a room
 const checkRoomAvailability = async ({ checkInDate, checkOutDate, room }) => {
@@ -50,12 +51,10 @@ export const createBooking = async (req, res) => {
       room,
     });
     if (!isAvailable) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Room is not available for the selected dates.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Room is not available for the selected dates.",
+      });
     }
 
     // get total price from room
@@ -81,13 +80,34 @@ export const createBooking = async (req, res) => {
         .status(500)
         .json({ success: false, message: "Error creating booking." });
     }
-    res
-      .status(201)
-      .json({
-        success: true,
-        booking,
-        message: "Booking created successfully.",
-      });
+
+    const mailOptions = {
+      from: process.env.SENDER_EMAIL,
+      to: req.user.email,
+      subject: "New Booking Details",
+      html: `<h2>Your Booking Details</h2>
+              <p>Dear ${req.user.username},</p>
+              <p>Thank you for your booking! Here are your details: </p>
+              <ul>
+                <li><strong>Booking ID:</strong> ${booking._id}</li>
+                <li><strong>Hotel Name:</strong> ${roomData.hotel.name}</li>
+                <li><strong>Location:</strong> ${roomData.hotel.address}</li>
+                <li><strong>Date:</strong> ${booking.checkInDate.toDateString()}</li>
+                <li><strong>Booking Amount:</strong> ${
+                  process.env.CURRENCY || "$"
+                } ${booking.totalPrice} / night</li>
+              </ul>
+             <p>We look forward to welcoming you!</p>
+             <p>If you need to make any change feel fre to contact us.</p>,`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(201).json({
+      success: true,
+      booking,
+      message: "Booking created successfully.",
+    });
   } catch (error) {
     console.error("Error creating booking:", error);
     res.status(500).json({ success: false, error: "Error creating booking" });
