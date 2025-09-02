@@ -1,7 +1,7 @@
 import Booking from "../models/booking.model.js";
 import Room from "../models/room.model.js";
 import Hotel from "../models/hotel.model.js";
-import transporter from "../config/NodeMailer.js";
+import transporter from "../config/nodemailer.js";
 
 // function to check the availability of a room
 const checkRoomAvailability = async ({ checkInDate, checkOutDate, room }) => {

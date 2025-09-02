@@ -13,7 +13,6 @@ import bookingRouter from "./routes/booking.routes.js";
 connectCloudinary();
 const app = express();
 
-console.log("--- ✅ SERVER IS STARTING WITH LATEST CODE ---");
 
 app.use(cors());
 app.use(express.json());
