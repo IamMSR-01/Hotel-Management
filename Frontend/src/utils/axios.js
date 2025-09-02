@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const apiUrl = process.env.VITE_BACKEND_URL
+
 const API = axios.create({
-    baseURL: 'http://localhost:8000/api/v1',
+    baseURL: apiUrl,
     withCredentials: true,
 })
 
