@@ -31,7 +31,9 @@ function Hero() {
   };
 
   return (
-    <div className="h-screen flex flex-col items-start justify-center px-6 md:px-16 lg:px-24 xl:px-32 bg-[url('public/heroImage.png')] text-white bg-cover bg-center bg-no-repeat">
+    <div className="h-screen flex flex-col items-start justify-center px-6 md:px-16 lg:px-24 xl:px-32 text-white bg-cover bg-center bg-no-repeat"
+    style={{ backgroundImage: `url('/heroImage.png')` }}
+    >
       <div className="absolute inset-0 bg-black/50 z-0"></div>
       <p className="bg-[#49B9FF]/50 px-3.5 py-1 rounded-full mt-20">
         The Ultimate Hotel Experience
