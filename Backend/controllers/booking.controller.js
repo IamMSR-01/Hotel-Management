@@ -93,12 +93,11 @@ export const createBooking = async (req, res) => {
                 <li><strong>Hotel Name:</strong> ${roomData.hotel.name}</li>
                 <li><strong>Location:</strong> ${roomData.hotel.address}</li>
                 <li><strong>Date:</strong> ${booking.checkInDate.toDateString()}</li>
-                <li><strong>Booking Amount:</strong> ${
-                  process.env.CURRENCY || "$"
-                } ${booking.totalPrice} / night</li>
+                <li><strong>Booking Amount:</strong> ${process.env.CURRENCY || "$"
+              } ${booking.totalPrice} / night</li>
               </ul>
-             <p>We look forward to welcoming you!</p>
-             <p>If you need to make any change feel fre to contact us.</p>,`,
+                <p>We look forward to welcoming you!</p>
+                <p>If you need to make any change feel fre to contact us.</p>,`,
     };
 
     await transporter.sendMail(mailOptions);
